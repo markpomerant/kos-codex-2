@@ -16,13 +16,24 @@ goes through model options or the constructor.
 The `widget` binds to the codex backend's `studio:service:codex` bean, which
 the backend exposes for this purpose.
 
+## Try it
+
+<Canvas of={Stories.ConfigPropertiesStory} sourceState="none" />
+
+Toggling `enabled` writes to the codex backend and reads back; the change survives a
+reload of the page because it is persisted on the backend.
+
 ## How it was built
 
-| Step | Command |
-| ---- | ------- |
-| Each binding | kos-codegen `add_config_property` on `widget`: path `studio:service:codex`, the attribute, and its value type |
-| The service path | the app's registration maps the config service to the codex backend's `/api/config` |
-| The component | `kosui component --name config-properties-view` |
+**Each binding.** Add a config property on `widget`: path `studio:service:codex`, the attribute, and its value type.
+
+**The service path.** The app's registration maps the config service to the codex backend's `/api/config`.
+
+**The component.**
+
+```bash
+kosui component --name config-properties-view --project model-components
+```
 
 ## A binding
 
@@ -73,8 +84,3 @@ the model, use the mapped service path) are what this binding wants.
 <Snippet name="config-properties-view@config-properties-view.tsx" />
 
 <Snippet name="config-properties-view-story@config-properties-view.stories.tsx" />
-
-<Canvas of={Stories.ConfigPropertiesStory} sourceState="none" />
-
-Toggling `enabled` writes to the codex backend and reads back; the change survives a
-reload of the page because it is persisted on the backend.

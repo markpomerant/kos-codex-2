@@ -11,13 +11,31 @@ A list response arrives as rows; the model holds child models. Four options
 on the request turn rows into models without hand-written loops: `transform`,
 `iterateOver`, `mappings` and `modelFactory` (with `idExtractor`).
 
+## Try it
+
+<Canvas of={Stories.ServiceMappingStory} sourceState="none" />
+
+Press **add note** and a row is mapped from the returned object into a
+`Note` model. Press **reload** and the count holds: existing notes are updated
+in place, and none is destroyed and recreated.
+
 ## How it was built
 
-| Step | Command |
-| ---- | ------- |
-| The LOAD request | kos-codegen `add_service_request`: `onNotesLoaded`, `GET /api/codex/objects`, lifecycle LOAD |
-| The reload | kos-codegen `add_service_request`: `reloadNotes`, same path, "method" mode |
-| The child model | `kosui model --name note --project core-concept-models`, then `add_property desc` |
+**The LOAD request.**
+
+```bash
+kosui model:add-service-request --modelName document --project core-concept-models \
+  --methodName onNotesLoaded --servicePath /api/codex/objects --method get --lifecycle LOAD
+```
+
+**The reload.** `reloadNotes` is written by hand: it carries the same `onNotesLoaded`
+catalog entry without a lifecycle, so it runs when called.
+
+**The child model.** Then add `desc` as a model property of `note`.
+
+```bash
+kosui model --name note --project core-concept-models
+```
 
 ## The mapper is the boundary
 
@@ -85,5 +103,3 @@ same model instance.
 <Snippet name="service-mapping-view@service-mapping-view.tsx" />
 
 <Snippet name="service-mapping-view-story@service-mapping-view.stories.tsx" />
-
-<Canvas of={Stories.ServiceMappingStory} sourceState="none" />

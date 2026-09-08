@@ -11,3 +11,5 @@ export * from './models/session';
 export * from './models/timer';
 export * from './models/device';
 export * from './models/journal';
+export * from './models/sprint';
+export * from './models/ticket';

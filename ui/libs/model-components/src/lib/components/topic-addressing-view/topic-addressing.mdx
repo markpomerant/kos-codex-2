@@ -12,13 +12,25 @@ wildcard with a named capture, and a destination address for the subscription
 itself. The options on the other topic pages decide what happens to a event
 after it is received.
 
+## Try it
+
+<Canvas of={Stories.TopicAddressingStory} sourceState="none" />
+
+The two `fos` and `bridge` options select the FOS broker transport. They are
+marked `@internal` in the SDK and need a FOS-capable device, so the codex
+does not teach them.
+
 ## How it was built
 
-| Step | Command |
-| ---- | ------- |
-| Add the fields | kos-codegen `add_property`: `wildcardPath: string`, `addressedEvents: number` |
-| Add the handlers | kos-codegen `add_topic_handler` for `onZoneEvent` on `/codex/widget/zone/*` and `onAddressedEvent` |
-| Generate the component | `kosui component --name topic-addressing-view --project model-components` |
+**Add the fields.** Add `wildcardPath: string` and `addressedEvents: number` as model properties of `widget`.
+
+**Add the handlers.** Add a topic handler on `widget` for `onZoneEvent` on `/codex/widget/zone/*` and one for `onAddressedEvent`.
+
+**Generate the component.**
+
+```bash
+kosui component --name topic-addressing-view --project model-components
+```
 
 Each snippet below shows the field the handler writes together with the
 handler itself.
@@ -56,9 +68,3 @@ no address.
 <Snippet name="topic-addressing-view@topic-addressing-view.tsx" />
 
 <Snippet name="topic-addressing-story@topic-addressing-view.stories.tsx" />
-
-<Canvas of={Stories.TopicAddressingStory} sourceState="none" />
-
-The two `fos` and `bridge` options select the FOS broker transport. They are
-marked `@internal` in the SDK and need a FOS-capable device, so the codex
-does not teach them.

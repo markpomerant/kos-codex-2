@@ -16,6 +16,8 @@ import { Session } from '@kos-codex-2/core-concept-models';
 import { Timer } from '@kos-codex-2/core-concept-models';
 import { Device } from '@kos-codex-2/core-concept-models';
 import { Journal } from '@kos-codex-2/core-concept-models';
+import { Sprint } from '@kos-codex-2/core-concept-models';
+import { TicketContainer } from '@kos-codex-2/core-concept-models';
 
 // extract-code registration-chain
 KosModelRegistry.dispense
@@ -32,6 +34,8 @@ KosModelRegistry.dispense
   .model(Timer)
   .model(Device)
   .model(Journal)
+  .model(Sprint)
+  .model(TicketContainer)
   // extract-code registration-companion
   // A companion is registered against its parent's type: whenever a Session is
   // created, the framework creates its Timer alongside it.

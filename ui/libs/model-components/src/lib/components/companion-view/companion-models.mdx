@@ -13,13 +13,30 @@ Neither owns the other. A companion attaches behaviour to a model you do
 not own. Creating the parent creates the companion; the parent's code does
 not reference it.
 
+## Try it
+
+<Canvas of={Stories.CompanionStory} sourceState="none" />
+
+The timer's id is derived from the session's, and `timer.sessionUser` is the
+parent's `user` read through the injected property.
+
 ## How it was built
 
-| Step | Command |
-| ---- | ------- |
-| Scaffold the companion | kos-codegen `add_companion`: name `timer`, parent `session`, pattern composition |
-| Bind it in the app | the registration chain gains `.companion(Session.type, Timer.type)` |
-| Register, hook, component | `register_model timer`, `kosui model:hook --modelName session`, `kosui component --name companion-view` |
+**Scaffold the companion.**
+
+```bash
+kosui model:companion --name timer --project core-concept-models \
+  --companionParent session --companionPattern composition
+```
+
+**Bind it in the app.** The registration chain gains `.companion(Session.type, Timer.type)`.
+
+**Register, hook, component.** Register `timer` in the app's registration chain.
+
+```bash
+kosui model:hook --modelName session --project model-components
+kosui component --name companion-view --project model-components
+```
 
 ## The decorator
 
@@ -75,8 +92,3 @@ instance for a parent, by the companion's type id.
 <Snippet name="companion-view@companion-view.tsx" />
 
 <Snippet name="companion-view-story@companion-view.stories.tsx" />
-
-<Canvas of={Stories.CompanionStory} sourceState="none" />
-
-The timer's id is derived from the session's, and `timer.sessionUser` is the
-parent's `user` read through the injected property.

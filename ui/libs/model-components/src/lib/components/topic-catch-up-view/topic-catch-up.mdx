@@ -28,14 +28,35 @@ out-of-band events: another client changed the list, and the topic delivers
 the change to this model. Topic handlers exist for these events. The model's
 own requests apply their responses; they do not wait for a topic.
 
+## Try it
+
+<Canvas of={Stories.TopicCatchUpStory} sourceState="none" />
+
+When the story opens, the baseline's own delta arrives during the request and
+is applied only after the response lands (the console shows "Baseline not
+ready … Queuing message"). The buttons ask the backend for further out-of-band
+changes, which arrive over the websocket like any device event.
+
 ## How it was built
 
-| Step | Command |
-| ---- | ------- |
-| The model | `scaffold_model journal`, then `add_container_support` (a container of `NoteModel` on the default `container` property) and `add_property` for the two counters |
-| The baseline | `add_service_request`: `onNotesLoaded`, lifecycle LOAD, on `GET /api/codex/test/objects/race` |
-| The handlers | `add_topic_handler` twice, on the backend's `added` and `removed` topics; `requiresBaseline` and `replay` added to the decorators |
-| The device side | the `device` model's requests ask the backend to add or remove a note out of band |
+**The model.** Scaffold `journal` and make it a container of notes, then add the two
+counters as model properties.
+
+```bash
+kosui model --name journal --project core-concept-models
+kosui model:add-container --modelName journal --project core-concept-models --childModel note
+```
+
+**The baseline.** `--lifecycle LOAD` runs the request when the model loads.
+
+```bash
+kosui model:add-service-request --modelName journal --project core-concept-models \
+  --methodName onNotesLoaded --servicePath /api/codex/test/objects/race --method get --lifecycle LOAD
+```
+
+**The handlers.** Add a topic handler on `journal` twice, on the backend's `added` and `removed` topics; `requiresBaseline` and `replay` are added to the decorators.
+
+**The device side.** The `device` model's `addObject` and `removeObject` requests (POST `/api/codex/test/objects/added` and `/api/codex/test/objects/removed`) ask the backend to add or remove a note out of band.
 
 ## A baseline that races its own delta (case B, on demand)
 
@@ -89,10 +110,3 @@ drops the model. Both run after the baseline has been applied.
 <Snippet name="topic-catch-up-view@topic-catch-up-view.tsx" />
 
 <Snippet name="topic-catch-up-story@topic-catch-up-view.stories.tsx" />
-
-<Canvas of={Stories.TopicCatchUpStory} sourceState="none" />
-
-When the story opens, the baseline's own delta arrives during the request and
-is applied only after the response lands (the console shows "Baseline not
-ready … Queuing message"). The buttons ask the backend for further out-of-band
-changes, which arrive over the websocket like any device event.

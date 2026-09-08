@@ -133,6 +133,28 @@
               "factory": "Journal",
               "purpose": "a list of notes whose baseline read races its own delta, for the topic catch-up exemplar",
               "container": true
+            },
+            "sprint": {
+              "name": "sprint",
+              "type": "sprint-model",
+              "singleton": false,
+              "factory": "Sprint"
+            },
+            "ticket": {
+              "name": "ticket",
+              "type": "ticket-model",
+              "singleton": false,
+              "factory": "Ticket",
+              "managedBy": [
+                "ticket-container"
+              ]
+            },
+            "ticket-container": {
+              "name": "ticket-container",
+              "type": "ticket-container-model",
+              "singleton": false,
+              "container": true,
+              "factory": "TicketContainer"
             }
           },
           "generator": {
@@ -206,7 +228,7 @@
         "projectType": "model-component"
       }
     ],
-    "timestamp": 1788895026472
+    "timestamp": 1788905430361
   },
   "projectsByType:model": {
     "data": [
@@ -214,7 +236,7 @@
       "dispense-concept-models",
       "kos-codex-2-models"
     ],
-    "timestamp": 1788895026472
+    "timestamp": 1788905430361
   },
   "allModels:/Users/markpomerant/Code/kos-codex-2/ui": {
     "data": [
@@ -247,11 +269,23 @@
         "project": "core-concept-models"
       },
       {
+        "model": "sprint",
+        "project": "core-concept-models"
+      },
+      {
         "model": "task",
         "project": "core-concept-models"
       },
       {
         "model": "team",
+        "project": "core-concept-models"
+      },
+      {
+        "model": "ticket",
+        "project": "core-concept-models"
+      },
+      {
+        "model": "ticket-container",
         "project": "core-concept-models"
       },
       {
@@ -267,7 +301,7 @@
         "project": "core-concept-models"
       }
     ],
-    "timestamp": 1788895026472
+    "timestamp": 1788905430361
   },
   "allProjects": {
     "data": [
@@ -277,272 +311,25 @@
       "kos-codex-2-models",
       "model-components"
     ],
-    "timestamp": 1788895026482
+    "timestamp": 1788905430370
   },
   "projectsByMultipleTypes:ui,splash,model-component": {
     "data": [
       "kos-codex-2-ui",
       "model-components"
     ],
-    "timestamp": 1788895026484
+    "timestamp": 1788905430370
   },
   "projectsByType:plugin": {
     "data": [],
-    "timestamp": 1788895026484
+    "timestamp": 1788905430371
   },
   "pluginProjects": {
     "data": [],
-    "timestamp": 1788895026484
+    "timestamp": 1788905430371
   },
   "projectsByType:i18n": {
     "data": [],
-    "timestamp": 1788895026485
-  },
-  "projectDetails:core-concept-models:/Users/markpomerant/Code/kos-codex-2/ui": {
-    "data": {
-      "name": "core-concept-models",
-      "root": "libs/core-concept-models",
-      "sourceRoot": "libs/core-concept-models/src",
-      "projectType": "library",
-      "targets": {
-        "build": {
-          "executor": "@nx/vite:build",
-          "outputs": [
-            "{options.outputPath}"
-          ],
-          "defaultConfiguration": "production",
-          "options": {
-            "outputPath": "dist/libs/core-concept-models"
-          },
-          "configurations": {
-            "development": {
-              "mode": "development"
-            },
-            "production": {
-              "mode": "production"
-            }
-          }
-        },
-        "lint": {
-          "executor": "@nx/eslint:lint"
-        },
-        "api": {
-          "command": "kosui api:generate --project=core-concept-models",
-          "options": {
-            "host": "http://127.0.0.1:8081",
-            "defaultVersion": "snapshot"
-          }
-        }
-      },
-      "tags": []
-    },
-    "timestamp": 1788895027837
-  },
-  "projectDetails:model-components:/Users/markpomerant/Code/kos-codex-2/ui": {
-    "data": {
-      "name": "model-components",
-      "root": "libs/model-components",
-      "sourceRoot": "libs/model-components/src",
-      "projectType": "library",
-      "targets": {
-        "lint": {
-          "executor": "@nx/eslint:lint"
-        },
-        "build": {
-          "executor": "@nx/vite:build",
-          "outputs": [
-            "{options.outputPath}"
-          ],
-          "defaultConfiguration": "production",
-          "options": {
-            "outputPath": "dist/libs/model-components"
-          },
-          "configurations": {
-            "development": {
-              "mode": "development"
-            },
-            "production": {
-              "mode": "production"
-            }
-          }
-        }
-      },
-      "tags": []
-    },
-    "timestamp": 1788696643187
-  },
-  "projectDetails:kos-codex-2-ui:/Users/markpomerant/Code/kos-codex-2/ui": {
-    "data": {
-      "name": "kos-codex-2-ui",
-      "root": "apps/kos-codex-2-ui",
-      "sourceRoot": "apps/kos-codex-2-ui/src",
-      "projectType": "application",
-      "targets": {
-        "build": {
-          "executor": "@nx/webpack:webpack",
-          "outputs": [
-            "{options.outputPath}"
-          ],
-          "defaultConfiguration": "production",
-          "options": {
-            "compiler": "babel",
-            "outputPath": "dist/apps/kos-codex-2-ui",
-            "index": "apps/kos-codex-2-ui/src/index.html",
-            "baseHref": "/",
-            "main": "apps/kos-codex-2-ui/src/main.ts",
-            "tsConfig": "apps/kos-codex-2-ui/tsconfig.app.json",
-            "assets": [
-              "apps/kos-codex-2-ui/src/favicon.ico",
-              "apps/kos-codex-2-ui/src/assets"
-            ],
-            "styles": [],
-            "scripts": [],
-            "webpackConfig": "apps/kos-codex-2-ui/webpack.config.ts",
-            "skipTypeChecking": true,
-            "_skipTypeCheckingTodo": "Remove once `nx run-many --target=typecheck` is clean."
-          },
-          "configurations": {
-            "development": {
-              "extractLicenses": false,
-              "optimization": false,
-              "sourceMap": true,
-              "vendorChunk": true
-            },
-            "production": {
-              "fileReplacements": [
-                {
-                  "replace": "apps/kos-codex-2-ui/src/environments/environment.ts",
-                  "with": "apps/kos-codex-2-ui/src/environments/environment.prod.ts"
-                }
-              ],
-              "optimization": true,
-              "outputHashing": "all",
-              "sourceMap": false,
-              "namedChunks": false,
-              "extractLicenses": true,
-              "vendorChunk": false,
-              "baseHref": "./"
-            }
-          }
-        },
-        "serve": {
-          "executor": "@nx/react:module-federation-dev-server",
-          "defaultConfiguration": "development",
-          "options": {
-            "buildTarget": "kos-codex-2-ui:build",
-            "hmr": false,
-            "port": 4200
-          },
-          "configurations": {
-            "development": {
-              "buildTarget": "kos-codex-2-ui:build:development"
-            },
-            "production": {
-              "buildTarget": "kos-codex-2-ui:build:production",
-              "hmr": false
-            }
-          }
-        },
-        "lint": {
-          "executor": "@nx/eslint:lint"
-        },
-        "serve-static": {
-          "executor": "@nx/react:module-federation-static-server",
-          "defaultConfiguration": "production",
-          "options": {
-            "serveTarget": "kos-codex-2-ui:serve"
-          },
-          "configurations": {
-            "development": {
-              "serveTarget": "kos-codex-2-ui:serve:development"
-            },
-            "production": {
-              "serveTarget": "kos-codex-2-ui:serve:production"
-            }
-          }
-        },
-        "kab": {
-          "command": "node tools/scripts/kabtool.mjs build kos-codex-2-ui && node tools/scripts/kabtool.mjs list kos-codex-2-ui ",
-          "options": {
-            "outputPath": "{projectRoot}/target/",
-            "zipName": "ui.zip",
-            "kabName": "kos-codex-2-ui.kab"
-          },
-          "dependsOn": [
-            "zip"
-          ]
-        },
-        "zip": {
-          "command": "node tools/scripts/archiver.js kos-codex-2-ui",
-          "options": {
-            "outputPath": "{projectRoot}/target/",
-            "zipName": "ui.zip"
-          },
-          "dependsOn": [
-            "build",
-            "descriptor",
-            "sbom"
-          ]
-        },
-        "descriptor": {
-          "command": "node tools/scripts/descriptor.mjs kos-codex-2-ui",
-          "options": {
-            "outputPath": "dist/{projectRoot}",
-            "fileName": "descriptor.json"
-          },
-          "dependsOn": [
-            "build"
-          ]
-        },
-        "version": {
-          "command": "node tools/scripts/update-release-version.mjs kos-codex-2-ui {args.ver}",
-          "options": {},
-          "dependsOn": []
-        },
-        "sbom": {
-          "executor": "@kosdev-code/kos-nx-plugin:sbom",
-          "outputs": [
-            "{workspaceRoot}/dist/{projectRoot}/sbom.spdx.json",
-            "{workspaceRoot}/dist/{projectRoot}/sbom.cyclonedx.json"
-          ],
-          "cache": true,
-          "inputs": [
-            "production",
-            "^production",
-            "{workspaceRoot}/package-lock.json"
-          ],
-          "options": {
-            "outputPath": "dist/{projectRoot}",
-            "softFail": true
-          }
-        },
-        "typecheck": {
-          "command": "tsc --noEmit -p {projectRoot}/tsconfig.app.json"
-        },
-        "storybook": {
-          "command": "storybook dev -p 4400 -c apps/kos-codex-2-ui/.storybook",
-          "dependsOn": [
-            "extract"
-          ]
-        },
-        "build-storybook": {
-          "command": "storybook build -c apps/kos-codex-2-ui/.storybook -o dist/storybook/kos-codex-2",
-          "outputs": [
-            "{workspaceRoot}/dist/storybook/kos-codex-2"
-          ],
-          "dependsOn": [
-            "extract"
-          ]
-        },
-        "extract": {
-          "command": "node node_modules/@matrica-code/snippet-extractor/extractSnippets.mjs --reset --snippetFile=libs/model-components/src/snippets.json libs/core-concept-models/src libs/dispense-concept-models/src libs/model-components/src",
-          "outputs": [
-            "{workspaceRoot}/libs/model-components/src/snippets.json"
-          ]
-        }
-      },
-      "tags": []
-    },
-    "timestamp": 1788696644333
+    "timestamp": 1788905430372
   }
 }

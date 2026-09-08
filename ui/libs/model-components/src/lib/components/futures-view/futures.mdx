@@ -17,13 +17,35 @@ state. `@kosFutureAware` gives a model the slot and the derived state
 `task` runs the codex backend's "additional data" operation, which reports progress
 over the socket until it succeeds.
 
+## Try it
+
+<Canvas of={Stories.FuturesStory} sourceState="none" />
+
+Press **start**: the status goes `IN_PROGRESS`, progress increases as the codex backend
+reports it, and the task is `done` on `SUCCESS`.
+
 ## How it was built
 
-| Step | Command |
-| ---- | ------- |
-| Scaffold with future support | `kosui model --name task --project core-concept-models --future-aware complete` |
-| The operation | kos-codegen `add_service_request`: `startAdditionalData`, `POST /api/codex/objects/additional-data/{numOfItems}`, "method" mode |
-| Register, hook, component | `register_model`, `kosui model:hook --modelName task`, `kosui component --name futures-view` |
+**Scaffold with future support.**
+
+```bash
+kosui model --name task --project core-concept-models --futureAware complete
+```
+
+**The operation.** Without `--lifecycle` the request runs when the method is called.
+
+```bash
+kosui model:add-service-request --modelName task --project core-concept-models \
+  --methodName startAdditionalData \
+  --servicePath /api/codex/objects/additional-data/{numOfItems} --method post
+```
+
+**Register, hook, component.** Register `task` in the app's registration chain.
+
+```bash
+kosui model:hook --modelName task --project model-components
+kosui component --name futures-view --project model-components
+```
 
 ## Future support
 
@@ -80,23 +102,33 @@ future instead of to a new one.
 
 <Snippet name="futures-view-story@futures-view.stories.tsx" />
 
-<Canvas of={Stories.FuturesStory} sourceState="none" />
-
-Press **start**: the status goes `IN_PROGRESS`, progress increases as the codex backend
-reports it, and the task is `done` on `SUCCESS`.
-
 ## Adding a future to an existing model
 
 `task` was scaffolded with future support. An existing model gains the same
 capability in place. The example is `project`, which already owns tasks and
 depends on a team.
 
-| Step | Command |
-| ---- | ------- |
-| Add future support | kos-codegen `add_future_to_model`: model `project`, level `complete` |
-| Add the operation | kos-codegen `add_service_request` on `project`: `startSync`, `POST /api/codex/objects/additional-data/{numOfItems}`, "method" mode |
-| Add the derived field | kos-codegen `add_property`: `lastSync: string` |
-| Generate the component | `kosui component --name project-sync-view` |
+**Add future support.**
+
+```bash
+kosui model:add-future --modelName project --project core-concept-models --futureType complete
+```
+
+**Add the operation.**
+
+```bash
+kosui model:add-service-request --modelName project --project core-concept-models \
+  --methodName startSync \
+  --servicePath /api/codex/objects/additional-data/{numOfItems} --method post
+```
+
+**Add the derived field.** `lastSync: string` added as a model property of `project`.
+
+**Generate the component.**
+
+```bash
+kosui component --name project-sync-view --project model-components
+```
 
 ### Future support, with the handler renamed (a migration option)
 

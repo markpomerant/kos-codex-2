@@ -15,20 +15,47 @@ device.
 it does not stand for a part of a machine. A button press in the view is an
 event that calls a method on the model; the model owns the number.
 
+## Try it
+
+<Canvas of={Stories.CounterStory} sourceState="none" />
+
+Press **+** and **−**. `decrement` returns early when `isAtFloor`, and the
+button's disabled state is read from the same computed property, so the model enforces
+the floor.
+
 ## How it was built
 
-| Step | Command |
-| ---- | ------- |
-| Scaffold the model | `kosui model --name counter --project core-concept-models` |
-| Add the `count` field | kos-codegen `add_property`: `count: number = 0` |
-| Add the `isAtFloor` computed property | kos-codegen `add_computed`: `isAtFloor(): boolean` |
-| Check it | kos-codegen `validate_model` |
-| Register it with the app | kos-codegen `register_model` into `kos-codex-2-ui` |
-| Generate the hook and HOC | `kosui model:hook --modelName counter --project model-components` |
-| Generate the component | `kosui component --name counter-view --project model-components` |
+**Scaffold the model.**
 
-The `add_*` and `register_model` steps are tools of the kos-codegen MCP server;
-the rest are `kosui` commands. The sections below follow the same order.
+```bash
+kosui model --name counter --project core-concept-models
+```
+
+**Add the `count` field.** Add `count: number = 0` as a model property of `counter`.
+
+**Add the `isAtFloor` computed property.** Add `isAtFloor(): boolean` as a computed
+model property of `counter`.
+
+**Check it.** Validate the `counter` model.
+
+**Register it with the app.** Register `counter` in the registration chain of
+`kos-codex-2-ui`.
+
+**Generate the hook and HOC.**
+
+```bash
+kosui model:hook --modelName counter --project model-components
+```
+
+**Generate the component.**
+
+```bash
+kosui component --name counter-view --project model-components
+```
+
+The `kosui` steps generate files. The other steps edit the model source and the
+app's registration file, and check the result. The sections below follow the
+same order.
 
 ## The type id
 
@@ -99,7 +126,7 @@ a `CounterModel`.
 
 ## Where registration happens
 
-`register_model` upserts the bean into the app's registration chain, the file
+Registering the model adds the bean to the app's registration chain, the file
 declared under `registration.file` in the app's `.kos.json`. Scaffolding on its
 own does not register the model. Registration declares which models an app may
 build; no model code runs until something asks for an instance.
@@ -142,9 +169,3 @@ The story renders the connected view with an id; the model is built on first
 render.
 
 <Snippet name="counter-story@counter-view.stories.tsx" />
-
-<Canvas of={Stories.CounterStory} sourceState="none" />
-
-Press **+** and **−**. `decrement` returns early when `isAtFloor`, and the
-button's disabled state is read from the same computed property, so the model enforces
-the floor.

@@ -17,13 +17,30 @@ undefined and `isFsmInitialized` is false.
 list is invalid. `throwOnInvalid` belongs to the machine's options, the
 second decorator argument, and a guard can override it per method.
 
+## Try it
+
+<Canvas of={Stories.StateMachineStory} sourceState="none" />
+
+**record** does nothing while idle or locked and appends while active. The
+journal shows the entry and exit handlers firing around each transition, and
+`closed` accepts nothing.
+
 ## How it was built
 
-| Step | Command |
-| ---- | ------- |
-| Scaffold | `kosui model --name session --project core-concept-models` |
-| The machine, guards and handlers | written on the model; there is no mutator for them |
-| Register, hook, component | `register_model`, `kosui model:hook --modelName session`, `kosui component --name state-machine-view` |
+**Scaffold.**
+
+```bash
+kosui model --name session --project core-concept-models
+```
+
+**The machine, guards and handlers.** Written on the model by hand.
+
+**Register, hook, component.** Register `session` in the app's registration chain.
+
+```bash
+kosui model:hook --modelName session --project model-components
+kosui component --name state-machine-view --project model-components
+```
 
 ## States and events
 
@@ -74,9 +91,3 @@ The view reads the two injected properties, `currentState` and
 <Snippet name="state-machine-view@state-machine-view.tsx" />
 
 <Snippet name="state-machine-view-story@state-machine-view.stories.tsx" />
-
-<Canvas of={Stories.StateMachineStory} sourceState="none" />
-
-**record** does nothing while idle or locked and appends while active. The
-journal shows the entry and exit handlers firing around each transition, and
-`closed` accepts nothing.

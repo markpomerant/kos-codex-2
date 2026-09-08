@@ -17,13 +17,25 @@ change.
 The example extends the `counter` model from *Simple Model*: a `milestone`
 string that follows `count`.
 
+## Try it
+
+<Canvas of={Stories.ModelEffectsStory} sourceState="none" />
+
+The milestone reads "at the floor" before anything is pressed; that value
+comes from the immediate run. After five presses of **+** it reads "multiple
+of five: 5".
+
 ## How it was built
 
-| Step | Command |
-| ---- | ------- |
-| The effect | kos-codegen `add_model_effect` on `counter`: method `onCountChanged` |
-| The derived field | kos-codegen `add_property`: `milestone: string` |
-| The component | `kosui component --name model-effects-view` |
+**The effect.** Add a model effect on `counter` with the method `onCountChanged`.
+
+**The derived field.** Add `milestone: string` as a model property of `counter`.
+
+**The component.**
+
+```bash
+kosui component --name model-effects-view --project model-components
+```
 
 ## The effect
 
@@ -56,9 +68,3 @@ other.
 <Snippet name="model-effects-view@model-effects-view.tsx" />
 
 <Snippet name="model-effects-view-story@model-effects-view.stories.tsx" />
-
-<Canvas of={Stories.ModelEffectsStory} sourceState="none" />
-
-The milestone reads "at the floor" before anything is pressed; that value
-comes from the immediate run. After five presses of **+** it reads "multiple
-of five: 5".

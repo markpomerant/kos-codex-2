@@ -272,6 +272,27 @@ Landing points: codegen | resources | tools | skills | codex-prose | none-needed
 
 ---
 
+### `kosui model` and `kosui model:container` ignore `--dryRun` (resolved in kos-ui-cli 3.0.21 global install, 2026-09-08: all three container commands report "DRY RUN — nothing was written" and the tree stays clean)
+- Context:        Checking what the two container commands generate before citing them on the Container Models page: `kosui model --name sample --project core-concept-models --container --containerSingleton false --dryRun` and `kosui model:container --modelName user --registrationProject core-concept-models --dryRun`.
+- Workaround:     Reverted the writes by hand (`.kos.json`, `src/index.ts`, `user/index.ts`; deleted `models/sample/` and `user/user-container-model.ts`).
+- Frequency:      always
+- Landing point:  tools
+- Rationale:      Both commands wrote every file and the `.kos.json` entries with `--dryRun` on the command line. The flag is listed in each command's `--help`.
+
+### `kosui model:container` crashes in the container template and leaves a partial write (resolved 2026-09-08: the command now appends `UserContainerOptions` to the existing types file and the container exports to the existing barrel; verified on `user`, reverted)
+- Context:        Same run as above, `kosui model:container --modelName user --registrationProject core-concept-models`.
+- Workaround:     None; reverted. `kosui model --name <x> --container` renders the same template without the error.
+- Frequency:      always for `model:container`
+- Landing point:  tools
+- Rationale:      `templates/kos-container-model/model/types/index.d.ts.template` reads `parentAware`, which `generateContainerModel` does not pass when invoked from `model:container` ("parentAware is not defined"). The model file, the barrel edit and the `.kos.json` entry had already been written when it threw, so the project is left importing a `./types` file that does not exist.
+
+### No `kosui` command puts a container on an existing model (resolved 2026-09-08: `kosui model:add-container --modelName <m> --project <p> --childModel <c> [--containerProperty] [--sortKey] [--childParentAware]` wraps the codemod, imports the child type, is idempotent; `model:add-parent-aware` added alongside. Pages updated. Remaining quirk: a dry run on a model that already has the decorator still lists the two files as "would be written".)
+- Context:        The Container Models page's build steps. The team owns its users, so the decorator sits on `team`. The only CLI routes (`kosui model --container`, `kosui model:container`) generate a separate `<model>-container` model.
+- Workaround:     The page states the two lines to write by hand (the decorator and the interface merge) and points at the sections that show them.
+- Frequency:      every domain model that owns a collection
+- Landing point:  tools
+- Rationale:      The mutator exists (`add_container_support`) but has no `kosui` surface, so a human following the page has nothing to run. Mark also wants the joined model-plus-container shape (`user` + `user-container`) taught as its own exemplar, since one class with several collections outgrows a single `@kosContainerAware`; that is a page, not a tool gap.
+
 ## SDK changes made in `~/Code/kos-ui-sdk` (committed on develop, 2026-09-07; published as 3.0.21 on 2026-09-08 and verified in the codex: buffered handlers deliver, a LOAD request with iterateOver + mappings fills the list on open, `modelFactory: Note` type-checks without a cast. Unchanged in 3.0.21: CONTINUE at construction-time injection; the envelope-without-data fallback.)
 
 | commit | change |

@@ -29,7 +29,7 @@ const preview: Preview = {
         order: [
           "Foundations", ["Simple Model", "Communication Patterns", "Model Relationships", "Computed Properties", "Prop Keys", "Advanced Options"],
           "Reactivity", ["Model Effects", "View Models"],
-          "Containers", ["Container Models", "Container Indexes", "Container Capacity", "Parent And Child"],
+          "Containers", ["Container Models", "Dedicated Container Model", "Container Indexes", "Container Capacity", "Parent And Child"],
           "Relationships", ["Model Dependencies", "Companion Models"],
           "Services", ["Services", "Service Mapping", "Service Caching", "Service Errors"],
           "Topics", ["Topic Handlers", "Topic Filtering", "Topic Rate Control", "Topic Flow Control", "Topic Addressing", "Lifecycle Race Conditions"],

@@ -1,0 +1,915 @@
+{
+  "generated": "2026-09-08",
+  "source": "the 'How it was built' tables as they stood before the human rewrite",
+  "recipes": [
+    {
+      "page": "Relationships/Companion Models",
+      "folder": "companion-view",
+      "steps": [
+        {
+          "step": "Scaffold the companion",
+          "command": "kos-codegen `add_companion`: name `timer`, parent `session`, pattern composition",
+          "tools": [
+            "add_companion"
+          ],
+          "cli": []
+        },
+        {
+          "step": "Bind it in the app",
+          "command": "the registration chain gains `.companion(Session.type, Timer.type)`",
+          "tools": [],
+          "cli": []
+        },
+        {
+          "step": "Register, hook, component",
+          "command": "`register_model timer`, `kosui model:hook --modelName session`, `kosui component --name companion-view`",
+          "tools": [],
+          "cli": [
+            "kosui model:hook --modelName session",
+            "kosui component --name companion-view"
+          ]
+        }
+      ]
+    },
+    {
+      "page": "Foundations/Computed Properties",
+      "folder": "computed-properties-view",
+      "steps": [
+        {
+          "step": "A computed property over the model's own state",
+          "command": "kos-codegen `add_computed` on `counter`: `isAtFloor(): boolean`",
+          "tools": [
+            "add_computed"
+          ],
+          "cli": []
+        },
+        {
+          "step": "Computed properties over dependencies",
+          "command": "kos-codegen `add_dependency` on `project` for the widget, then `add_computed`: `teamSize`, `counterParity`, `temperatureBand`, each reading a model that `add_dependency` injected",
+          "tools": [
+            "add_dependency"
+          ],
+          "cli": []
+        },
+        {
+          "step": "Hook, component, story",
+          "command": "`kosui model:hook --modelName project`, `kosui component --name computed-properties-view`",
+          "tools": [],
+          "cli": [
+            "kosui model:hook --modelName project",
+            "kosui component --name computed-properties-view"
+          ]
+        }
+      ]
+    },
+    {
+      "page": "Configuration/Config Conversion",
+      "folder": "config-conversion-view",
+      "steps": [
+        {
+          "step": "The region",
+          "command": "kos-codegen `describe_sdk_model region-info`, then `add_dependency` with the wiring it returns",
+          "tools": [],
+          "cli": []
+        },
+        {
+          "step": "The bindings",
+          "command": "kos-codegen `add_config_property` on `widget` for `volume`, `other_volume` and `unitSystemRangeInterval` on `studio:service:codex`",
+          "tools": [
+            "add_config_property"
+          ],
+          "cli": []
+        },
+        {
+          "step": "The service paths",
+          "command": "the app's registration maps config to `/api/config` and regions to `/api/regions` on the codex backend",
+          "tools": [],
+          "cli": []
+        },
+        {
+          "step": "The component",
+          "command": "`kosui component --name config-conversion-view`",
+          "tools": [],
+          "cli": [
+            "kosui component --name config-conversion-view"
+          ]
+        }
+      ]
+    },
+    {
+      "page": "Configuration/Config Properties",
+      "folder": "config-properties-view",
+      "steps": [
+        {
+          "step": "Each binding",
+          "command": "kos-codegen `add_config_property` on `widget`: path `studio:service:codex`, the attribute, and its value type",
+          "tools": [
+            "add_config_property"
+          ],
+          "cli": []
+        },
+        {
+          "step": "The service path",
+          "command": "the app's registration maps the config service to the codex backend's `/api/config`",
+          "tools": [],
+          "cli": []
+        },
+        {
+          "step": "The component",
+          "command": "`kosui component --name config-properties-view`",
+          "tools": [],
+          "cli": [
+            "kosui component --name config-properties-view"
+          ]
+        }
+      ]
+    },
+    {
+      "page": "Containers/Container Capacity",
+      "folder": "container-capacity-view",
+      "steps": [
+        {
+          "step": "Scaffold",
+          "command": "`kosui model --name project`, `kosui model --name task --futureAware complete`",
+          "tools": [],
+          "cli": [
+            "kosui model --name project",
+            "kosui model --name task --futureAware complete"
+          ]
+        },
+        {
+          "step": "The container",
+          "command": "kos-codegen `add_container_support`: property `tasks`, child `TaskModel`",
+          "tools": [
+            "add_container_support"
+          ],
+          "cli": []
+        },
+        {
+          "step": "The capacity",
+          "command": "`maxCapacity`, `evictionBatchSize`, `evictionStrategy` and `customEvictionFilter` added to `containerOptions`",
+          "tools": [],
+          "cli": []
+        },
+        {
+          "step": "Register, hook, component",
+          "command": "`register_model` ×2, `kosui model:hook --modelName project`, `kosui component --name container-capacity-view`",
+          "tools": [],
+          "cli": [
+            "kosui model:hook --modelName project",
+            "kosui component --name container-capacity-view"
+          ]
+        }
+      ]
+    },
+    {
+      "page": "Containers/Container Indexes",
+      "folder": "container-indexes-view",
+      "steps": [
+        {
+          "step": "The container",
+          "command": "kos-codegen `add_container_support`: child `UserModel` (the container-models page)",
+          "tools": [
+            "add_container_support"
+          ],
+          "cli": []
+        },
+        {
+          "step": "The indexes",
+          "command": "`indexMap` added to `containerOptions`",
+          "tools": [],
+          "cli": []
+        },
+        {
+          "step": "Sorting",
+          "command": "`sortKey` added to the same block",
+          "tools": [],
+          "cli": []
+        },
+        {
+          "step": "The component",
+          "command": "`kosui component --name container-indexes-view`",
+          "tools": [],
+          "cli": [
+            "kosui component --name container-indexes-view"
+          ]
+        }
+      ]
+    },
+    {
+      "page": "Containers/Container Models",
+      "folder": "container-models-view",
+      "steps": [
+        {
+          "step": "Scaffold both models",
+          "command": "`kosui model --name team`, `kosui model --name user --parentAware` (the parent-and-child page covers the flag)",
+          "tools": [],
+          "cli": [
+            "kosui model --name team",
+            "kosui model --name user --parentAware"
+          ]
+        },
+        {
+          "step": "Put the container on the team",
+          "command": "kos-codegen `add_container_support`: child `UserModel`",
+          "tools": [
+            "add_container_support"
+          ],
+          "cli": []
+        },
+        {
+          "step": "Own a single child too",
+          "command": "kos-codegen `add_child`: property `lead`, child `UserModel`, shape single",
+          "tools": [
+            "add_child"
+          ],
+          "cli": []
+        },
+        {
+          "step": "Register, hooks, component",
+          "command": "`register_model` ×2, `kosui model:hook` ×2, `kosui component --name container-models-view`",
+          "tools": [],
+          "cli": [
+            "kosui model:hook",
+            "kosui component --name container-models-view"
+          ]
+        }
+      ]
+    },
+    {
+      "page": "Foundations/Simple Model",
+      "folder": "counter-view",
+      "steps": [
+        {
+          "step": "Scaffold the model",
+          "command": "`kosui model --name counter --project core-concept-models`",
+          "tools": [],
+          "cli": [
+            "kosui model --name counter --project core-concept-models"
+          ]
+        },
+        {
+          "step": "Add the `count` field",
+          "command": "kos-codegen `add_property`: `count: number = 0`",
+          "tools": [
+            "add_property"
+          ],
+          "cli": []
+        },
+        {
+          "step": "Add the `isAtFloor` computed property",
+          "command": "kos-codegen `add_computed`: `isAtFloor(): boolean`",
+          "tools": [
+            "add_computed"
+          ],
+          "cli": []
+        },
+        {
+          "step": "Check it",
+          "command": "kos-codegen `validate_model`",
+          "tools": [
+            "validate_model"
+          ],
+          "cli": []
+        },
+        {
+          "step": "Register it with the app",
+          "command": "kos-codegen `register_model` into `kos-codex-2-ui`",
+          "tools": [
+            "register_model"
+          ],
+          "cli": []
+        },
+        {
+          "step": "Generate the hook and HOC",
+          "command": "`kosui model:hook --modelName counter --project model-components`",
+          "tools": [],
+          "cli": [
+            "kosui model:hook --modelName counter --project model-components"
+          ]
+        },
+        {
+          "step": "Generate the component",
+          "command": "`kosui component --name counter-view --project model-components`",
+          "tools": [],
+          "cli": [
+            "kosui component --name counter-view --project model-components"
+          ]
+        }
+      ]
+    },
+    {
+      "page": "Async/Futures",
+      "folder": "futures-view",
+      "steps": [
+        {
+          "step": "Scaffold with future support",
+          "command": "`kosui model --name task --project core-concept-models --futureAware complete`",
+          "tools": [],
+          "cli": [
+            "kosui model --name task --project core-concept-models --futureAware complete"
+          ]
+        },
+        {
+          "step": "The operation",
+          "command": "kos-codegen `add_service_request`: `startAdditionalData`, `POST /api/codex/objects/additional-data/{numOfItems}`, \"method\" mode",
+          "tools": [
+            "add_service_request"
+          ],
+          "cli": []
+        },
+        {
+          "step": "Register, hook, component",
+          "command": "`register_model`, `kosui model:hook --modelName task`, `kosui component --name futures-view`",
+          "tools": [],
+          "cli": [
+            "kosui model:hook --modelName task",
+            "kosui component --name futures-view"
+          ]
+        }
+      ]
+    },
+    {
+      "page": "Diagnostics/Logging",
+      "folder": "logging-view",
+      "steps": [
+        {
+          "step": "The default",
+          "command": "`@kosLoggerAware()` comes from the scaffold; `counter` shows it",
+          "tools": [],
+          "cli": []
+        },
+        {
+          "step": "The options",
+          "command": "`loggerProperty`, `loggerContext` and `@kosLogger` are written on `session`",
+          "tools": [],
+          "cli": []
+        },
+        {
+          "step": "The component",
+          "command": "`kosui component --name logging-view`",
+          "tools": [],
+          "cli": [
+            "kosui component --name logging-view"
+          ]
+        }
+      ]
+    },
+    {
+      "page": "Relationships/Model Dependencies",
+      "folder": "model-dependencies-view",
+      "steps": [
+        {
+          "step": "Scaffold",
+          "command": "`kosui model --name project --project core-concept-models`",
+          "tools": [],
+          "cli": [
+            "kosui model --name project --project core-concept-models"
+          ]
+        },
+        {
+          "step": "The widget",
+          "command": "kos-codegen `add_dependency`: property `widget`, type `WidgetModel`, ref `Widget.type`, id `widget-computed`",
+          "tools": [
+            "add_dependency"
+          ],
+          "cli": []
+        },
+        {
+          "step": "The team",
+          "command": "kos-codegen `add_dependency`: property `team`, type `TeamModel`, ref `Team.type`, id `project-team`; `options` added to the decorator, the id later replaced by a PropKey",
+          "tools": [
+            "add_dependency"
+          ],
+          "cli": []
+        },
+        {
+          "step": "The counter",
+          "command": "kos-codegen `add_dependency`: property `counter`, type `CounterModel`, ref `Counter.type`, id `project-counter`; `resolutionPolicy: CONTINUE` and `lifecycle: READY` added",
+          "tools": [
+            "add_dependency"
+          ],
+          "cli": []
+        },
+        {
+          "step": "Register, hook, component",
+          "command": "`register_model`, `kosui model:hook --modelName project`, `kosui component --name model-dependencies-view`",
+          "tools": [],
+          "cli": [
+            "kosui model:hook --modelName project",
+            "kosui component --name model-dependencies-view"
+          ]
+        }
+      ]
+    },
+    {
+      "page": "Reactivity/Model Effects",
+      "folder": "model-effects-view",
+      "steps": [
+        {
+          "step": "The effect",
+          "command": "kos-codegen `add_model_effect` on `counter`: method `onCountChanged`",
+          "tools": [
+            "add_model_effect"
+          ],
+          "cli": []
+        },
+        {
+          "step": "The derived field",
+          "command": "kos-codegen `add_property`: `milestone: string`",
+          "tools": [
+            "add_property"
+          ],
+          "cli": []
+        },
+        {
+          "step": "The component",
+          "command": "`kosui component --name model-effects-view`",
+          "tools": [],
+          "cli": [
+            "kosui component --name model-effects-view"
+          ]
+        }
+      ]
+    },
+    {
+      "page": "Async/Multi Futures",
+      "folder": "multi-futures-view",
+      "steps": [
+        {
+          "step": "The operations",
+          "command": "kos-codegen `add_service_request` on `timer`: `startShort` and `startLong`, both `POST /api/codex/objects/additional-data/{numOfItems}`",
+          "tools": [
+            "add_service_request"
+          ],
+          "cli": []
+        },
+        {
+          "step": "The decorators",
+          "command": "`@kosMultipleFutureAware` and the aliased `@kosFuture`s are written on the model; there is no mutator for them",
+          "tools": [],
+          "cli": []
+        }
+      ]
+    },
+    {
+      "page": "Containers/Parent And Child",
+      "folder": "parent-and-child-view",
+      "steps": [
+        {
+          "step": "The child",
+          "command": "`kosui model --name user --parentAware` (kos-codegen `scaffold_model` with `parentAware: true`)",
+          "tools": [
+            "scaffold_model"
+          ],
+          "cli": [
+            "kosui model --name user --parentAware"
+          ]
+        },
+        {
+          "step": "The parent sets a key",
+          "command": "the team's constructor writes `teamId` to its context bean",
+          "tools": [],
+          "cli": []
+        },
+        {
+          "step": "The parent enrolls the child",
+          "command": "the team builds each user with `kosParentId: this.id`, the option `@kosParentAware` reads",
+          "tools": [],
+          "cli": []
+        }
+      ]
+    },
+    {
+      "page": "Foundations/Prop Keys",
+      "folder": "prop-keys-view",
+      "steps": [
+        {
+          "step": "The computed property",
+          "command": "kos-codegen `add_computed` on `widget`: `zone`, derived from the id",
+          "tools": [
+            "add_computed"
+          ],
+          "cli": []
+        },
+        {
+          "step": "The handlers",
+          "command": "kos-codegen `add_topic_handler` twice: `onOwnReading` on `/codex/widget/{MODEL_ID}/reading`, and `onZoneStatus` on a topic constant built with `createPropKey`",
+          "tools": [
+            "add_topic_handler"
+          ],
+          "cli": []
+        },
+        {
+          "step": "The dependency",
+          "command": "on `project`, kos-codegen `add_property` for `teamKey` and the existing `add_dependency`, with its `id` changed to `createPropKey<ProjectModelImpl>('teamKey')`",
+          "tools": [
+            "add_property"
+          ],
+          "cli": []
+        },
+        {
+          "step": "The counters",
+          "command": "kos-codegen `add_property` for `ownReadings` and `zoneEvents`",
+          "tools": [
+            "add_property"
+          ],
+          "cli": []
+        }
+      ]
+    },
+    {
+      "page": "Services/Service Caching",
+      "folder": "service-caching-view",
+      "steps": [
+        {
+          "step": "The request",
+          "command": "kos-codegen `add_service_request`: `onStatsLoaded`, `GET /api/codex/objects/stats`, lifecycle LOAD",
+          "tools": [
+            "add_service_request"
+          ],
+          "cli": []
+        }
+      ]
+    },
+    {
+      "page": "Services/Service Errors",
+      "folder": "service-errors-view",
+      "steps": [
+        {
+          "step": "The request",
+          "command": "kos-codegen `add_service_request`: `loadNote`, `GET /api/codex/objects/{id}`, \"method\" mode",
+          "tools": [
+            "add_service_request"
+          ],
+          "cli": []
+        }
+      ]
+    },
+    {
+      "page": "Services/Service Mapping",
+      "folder": "service-mapping-view",
+      "steps": [
+        {
+          "step": "The LOAD request",
+          "command": "kos-codegen `add_service_request`: `onNotesLoaded`, `GET /api/codex/objects`, lifecycle LOAD",
+          "tools": [
+            "add_service_request"
+          ],
+          "cli": []
+        },
+        {
+          "step": "The reload",
+          "command": "kos-codegen `add_service_request`: `reloadNotes`, same path, \"method\" mode",
+          "tools": [
+            "add_service_request"
+          ],
+          "cli": []
+        },
+        {
+          "step": "The child model",
+          "command": "`kosui model --name note --project core-concept-models`, then `add_property desc`",
+          "tools": [],
+          "cli": [
+            "kosui model --name note --project core-concept-models"
+          ]
+        }
+      ]
+    },
+    {
+      "page": "Services/Services",
+      "folder": "services-view",
+      "steps": [
+        {
+          "step": "Pull the codex backend's API types",
+          "command": "`kosui api:generate --project=core-concept-models --studio --host=http://127.0.0.1:10010`",
+          "tools": [],
+          "cli": [
+            "kosui api:generate --project=core-concept-models --studio --host=http://127.0.0.1:10010"
+          ]
+        },
+        {
+          "step": "Scaffold the model",
+          "command": "`kosui model --name document --project core-concept-models`",
+          "tools": [],
+          "cli": [
+            "kosui model --name document --project core-concept-models"
+          ]
+        },
+        {
+          "step": "Give it the notes container",
+          "command": "kos-codegen `add_container_support`: property `notes`, child `NoteModel`",
+          "tools": [
+            "add_container_support"
+          ],
+          "cli": []
+        },
+        {
+          "step": "Add the requests",
+          "command": "kos-codegen `add_service_request` once per method: the path, the HTTP method, and either a lifecycle or \"method\" mode",
+          "tools": [
+            "add_service_request"
+          ],
+          "cli": []
+        },
+        {
+          "step": "Register, hook, component",
+          "command": "`register_model`, `kosui model:hook --modelName document`, `kosui component --name services-view`",
+          "tools": [],
+          "cli": [
+            "kosui model:hook --modelName document",
+            "kosui component --name services-view"
+          ]
+        }
+      ]
+    },
+    {
+      "page": "Lifecycle/State Machine",
+      "folder": "state-machine-view",
+      "steps": [
+        {
+          "step": "Scaffold",
+          "command": "`kosui model --name session --project core-concept-models`",
+          "tools": [],
+          "cli": [
+            "kosui model --name session --project core-concept-models"
+          ]
+        },
+        {
+          "step": "The machine, guards and handlers",
+          "command": "written on the model; there is no mutator for them",
+          "tools": [],
+          "cli": []
+        },
+        {
+          "step": "Register, hook, component",
+          "command": "`register_model`, `kosui model:hook --modelName session`, `kosui component --name state-machine-view`",
+          "tools": [],
+          "cli": [
+            "kosui model:hook --modelName session",
+            "kosui component --name state-machine-view"
+          ]
+        }
+      ]
+    },
+    {
+      "page": "Topics/Topic Addressing",
+      "folder": "topic-addressing-view",
+      "steps": [
+        {
+          "step": "Add the fields",
+          "command": "kos-codegen `add_property`: `wildcardPath: string`, `addressedEvents: number`",
+          "tools": [
+            "add_property"
+          ],
+          "cli": []
+        },
+        {
+          "step": "Add the handlers",
+          "command": "kos-codegen `add_topic_handler` for `onZoneEvent` on `/codex/widget/zone/*` and `onAddressedEvent`",
+          "tools": [
+            "add_topic_handler"
+          ],
+          "cli": []
+        },
+        {
+          "step": "Generate the component",
+          "command": "`kosui component --name topic-addressing-view --project model-components`",
+          "tools": [],
+          "cli": [
+            "kosui component --name topic-addressing-view --project model-components"
+          ]
+        }
+      ]
+    },
+    {
+      "page": "Topics/Lifecycle Race Conditions",
+      "folder": "topic-catch-up-view",
+      "steps": [
+        {
+          "step": "The model",
+          "command": "`scaffold_model journal`, then `add_container_support` (a container of `NoteModel` on the default `container` property) and `add_property` for the two counters",
+          "tools": [],
+          "cli": []
+        },
+        {
+          "step": "The baseline",
+          "command": "`add_service_request`: `onNotesLoaded`, lifecycle LOAD, on `GET /api/codex/test/objects/race`",
+          "tools": [],
+          "cli": []
+        },
+        {
+          "step": "The handlers",
+          "command": "`add_topic_handler` twice, on the backend's `added` and `removed` topics; `requiresBaseline` and `replay` added to the decorators",
+          "tools": [],
+          "cli": []
+        },
+        {
+          "step": "The device side",
+          "command": "the `device` model's requests ask the backend to add or remove a note out of band",
+          "tools": [],
+          "cli": []
+        }
+      ]
+    },
+    {
+      "page": "Topics/Topic Filtering",
+      "folder": "topic-filtering-view",
+      "steps": [
+        {
+          "step": "Add the state fields",
+          "command": "kos-codegen `add_property`: `threshold`, `alerts`, `evenSamples`, `firstEventAt`, `reading`",
+          "tools": [
+            "add_property"
+          ],
+          "cli": []
+        },
+        {
+          "step": "Add the handlers",
+          "command": "kos-codegen `add_topic_handler` for `onHighTemperature`, `onEvenSample`, `onFirstEvent`, `onReading`, each on its own topic",
+          "tools": [
+            "add_topic_handler"
+          ],
+          "cli": []
+        },
+        {
+          "step": "Generate the component",
+          "command": "`kosui component --name topic-filtering-view --project model-components`",
+          "tools": [],
+          "cli": [
+            "kosui component --name topic-filtering-view --project model-components"
+          ]
+        }
+      ]
+    },
+    {
+      "page": "Topics/Topic Flow Control",
+      "folder": "topic-flow-view",
+      "steps": [
+        {
+          "step": "Add the counters",
+          "command": "kos-codegen `add_property`: `flowBatches`, `flowBatchSum`, `flowAccepted`, `flowAttempts`, `flowSucceeded`",
+          "tools": [
+            "add_property"
+          ],
+          "cli": []
+        },
+        {
+          "step": "Add the handlers",
+          "command": "kos-codegen `add_topic_handler` for `onFlowBatch`, `onFlowLimited`, `onFlowRetried`",
+          "tools": [
+            "add_topic_handler"
+          ],
+          "cli": []
+        },
+        {
+          "step": "Generate the component",
+          "command": "`kosui component --name topic-flow-view --project model-components`",
+          "tools": [],
+          "cli": [
+            "kosui component --name topic-flow-view --project model-components"
+          ]
+        }
+      ]
+    },
+    {
+      "page": "Topics/Topic Handlers",
+      "folder": "topic-handlers-view",
+      "steps": [
+        {
+          "step": "Scaffold the model",
+          "command": "`kosui model --name widget --project core-concept-models`",
+          "tools": [],
+          "cli": [
+            "kosui model --name widget --project core-concept-models"
+          ]
+        },
+        {
+          "step": "Add the state fields",
+          "command": "kos-codegen `add_property`: `temperature: number`, `pings: number`, `rawEvent: string`",
+          "tools": [
+            "add_property"
+          ],
+          "cli": []
+        },
+        {
+          "step": "Add the handlers",
+          "command": "kos-codegen `add_topic_handler` once per handler: a name, a topic and the payload type",
+          "tools": [
+            "add_topic_handler"
+          ],
+          "cli": []
+        },
+        {
+          "step": "Register, hook, component",
+          "command": "`register_model`, `kosui model:hook --modelName widget`, `kosui component --name topic-handlers-view`",
+          "tools": [],
+          "cli": [
+            "kosui model:hook --modelName widget",
+            "kosui component --name topic-handlers-view"
+          ]
+        }
+      ]
+    },
+    {
+      "page": "Topics/Topic Rate Control",
+      "folder": "topic-rate-view",
+      "steps": [
+        {
+          "step": "Add the counters",
+          "command": "kos-codegen `add_property`: `debounceCalls`, `debounceLastBatch`, `throttleCalls`, `bufferItems`",
+          "tools": [
+            "add_property"
+          ],
+          "cli": []
+        },
+        {
+          "step": "Add the handlers",
+          "command": "kos-codegen `add_topic_handler` for `onBurstDebounced`, `onBurstThrottled`, `onBurstBuffered`",
+          "tools": [
+            "add_topic_handler"
+          ],
+          "cli": []
+        },
+        {
+          "step": "Generate the component",
+          "command": "`kosui component --name topic-rate-view --project model-components`",
+          "tools": [],
+          "cli": [
+            "kosui component --name topic-rate-view --project model-components"
+          ]
+        }
+      ]
+    },
+    {
+      "page": "Device/Troubles",
+      "folder": "troubles-view",
+      "steps": [
+        {
+          "step": "The decorator",
+          "command": "written on `session`; there is no mutator for it",
+          "tools": [],
+          "cli": []
+        },
+        {
+          "step": "The service path",
+          "command": "the codex backend hosts troubles at `/api/troubles`; the session passes that path to the trouble container through a `@kosDependency` with `options` (kos-codegen `add_dependency`, the option added to the decorator)",
+          "tools": [
+            "add_dependency"
+          ],
+          "cli": []
+        },
+        {
+          "step": "The backend side",
+          "command": "a `Trouble` subclass on the codex backend implementing the `path` interface, raised and removed through the backend's trouble service by two test endpoints; the `device` model calls them",
+          "tools": [],
+          "cli": []
+        }
+      ]
+    },
+    {
+      "page": "Reactivity/View Models",
+      "folder": "view-models-view",
+      "steps": [
+        {
+          "step": "The class",
+          "command": "`WidgetTemperatureViewModel`, written beside the widget model; there is no generator for view models",
+          "tools": [],
+          "cli": []
+        },
+        {
+          "step": "The decorator",
+          "command": "`@kosViewModel` on the class, with `@kosLoggerAware` for a logger",
+          "tools": [],
+          "cli": []
+        },
+        {
+          "step": "The state",
+          "command": "a `unit` field and a constructor that takes the data model",
+          "tools": [],
+          "cli": []
+        },
+        {
+          "step": "The computed values",
+          "command": "`display` and `isHot`, read from the data model and the unit",
+          "tools": [],
+          "cli": []
+        },
+        {
+          "step": "The action",
+          "command": "`toggleUnit`, which changes only ViewModel state",
+          "tools": [],
+          "cli": []
+        },
+        {
+          "step": "The component",
+          "command": "`kosui component --name view-models-view`",
+          "tools": [],
+          "cli": [
+            "kosui component --name view-models-view"
+          ]
+        }
+      ]
+    }
+  ]
+}

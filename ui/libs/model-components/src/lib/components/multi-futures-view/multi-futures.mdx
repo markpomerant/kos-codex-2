@@ -17,12 +17,24 @@ for `long`.
 The `timer` runs the codex backend's additional-data operation twice, with different
 sizes, as two futures.
 
+## Try it
+
+<Canvas of={Stories.MultiFuturesStory} sourceState="none" />
+
+Start both: the short one completes while the long one is still reporting
+progress, each in its own slot.
+
 ## How it was built
 
-| Step | Command |
-| ---- | ------- |
-| The operations | kos-codegen `add_service_request` on `timer`: `startShort` and `startLong`, both `POST /api/codex/objects/additional-data/{numOfItems}` |
-| The decorators | `@kosMultipleFutureAware` and the aliased `@kosFuture`s are written on the model; there is no mutator for them |
+**The operations.** `startLong` is written by hand; it reuses `TimerEndpoints.startShort` with a larger `numOfItems`.
+
+```bash
+kosui model:add-service-request --modelName timer --project core-concept-models \
+  --methodName startShort \
+  --servicePath /api/codex/objects/additional-data/{numOfItems} --method post
+```
+
+**The decorators.** `@kosMultipleFutureAware` and the aliased `@kosFuture`s are written on the model by hand.
 
 ## The decorator
 
@@ -74,8 +86,3 @@ The timer is a companion of the session, so the view reaches it with
 <Snippet name="multi-futures-view@multi-futures-view.tsx" />
 
 <Snippet name="multi-futures-view-story@multi-futures-view.stories.tsx" />
-
-<Canvas of={Stories.MultiFuturesStory} sourceState="none" />
-
-Start both: the short one completes while the long one is still reporting
-progress, each in its own slot.

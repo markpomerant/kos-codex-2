@@ -92,6 +92,26 @@
       "factory": "Journal",
       "purpose": "a list of notes whose baseline read races its own delta, for the topic catch-up exemplar",
       "container": true
+    },
+    "sprint": {
+      "name": "sprint",
+      "type": "sprint-model",
+      "singleton": false,
+      "factory": "Sprint"
+    },
+    "ticket": {
+      "name": "ticket",
+      "type": "ticket-model",
+      "singleton": false,
+      "factory": "Ticket",
+      "managedBy": ["ticket-container"]
+    },
+    "ticket-container": {
+      "name": "ticket-container",
+      "type": "ticket-container-model",
+      "singleton": false,
+      "container": true,
+      "factory": "TicketContainer"
     }
   },
   "generator": {

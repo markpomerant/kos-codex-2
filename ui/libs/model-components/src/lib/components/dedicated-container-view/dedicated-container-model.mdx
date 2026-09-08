@@ -1,0 +1,136 @@
+import { Canvas, Meta } from "@storybook/addon-docs/blocks";
+
+import { Snippet } from "../../snippet";
+import * as Stories from "./dedicated-container-view.stories";
+
+<Meta title="Containers/Dedicated Container Model" />
+
+# Dedicated Container Model
+
+A concept model can own a collection without managing it. The collection lives in a
+dedicated container model, a class whose only job is that collection, and the concept
+model enrolls it as an owned child with `@kosChild`. `sprint` is the concept here. It
+owns its tickets, but `ticket-container` holds them, adds them, and counts them; the
+sprint forwards to it.
+
+The Container Models page puts `@kosContainerAware` on the concept itself, which fits a
+model with one collection and nothing else to say about it. A model with several
+collections, or a collection with its own loading, indexing or event handling, outgrows
+that: one class can carry one `@kosContainerAware`, and folding every collection's
+logic into the owner turns it into a class that manages everything. Giving each
+collection its own container model and enrolling each as a child keeps the owner small.
+
+## Try it
+
+<Canvas of={Stories.DedicatedContainerStory} sourceState="none" />
+
+Press **add ticket** and a ticket is built by the container model and appears under the
+sprint. Press **complete next** and the first open ticket is struck through while `open`
+drops. Each ticket shows the sprint id it read from context; no ticket holds a reference
+to the sprint and none is parent-aware.
+
+## How it was built
+
+**Scaffold the concept.**
+
+```bash
+kosui model --name sprint --project core-concept-models
+```
+
+**Scaffold the item with its container.** One command writes `ticket` and
+`ticket-container`, a per-parent container model (`--containerSingleton false`) that
+holds tickets. An item model that already exists gains the same container with
+`kosui model:container --modelName ticket --registrationProject core-concept-models`.
+
+```bash
+kosui model --name ticket --project core-concept-models --container --containerSingleton false
+```
+
+**Enroll the container as a child of the sprint.** A container model counts as a
+single child.
+
+```bash
+kosui model:add-child --modelName sprint --project core-concept-models --childModel ticket-container --propertyName tickets --shape single
+```
+
+**Fill in the bodies.** The sprint builds its container in `init`, sets a context key,
+and forwards `addTicket`, `completeNext`, `ticketList` and `openCount`. The container
+model builds tickets and counts the open ones. The ticket reads `sprintId` from context.
+
+**Register, hook, component.** Register `sprint` and `ticket-container` in the app's
+registration chain; `ticket` registers with its container. Then generate the hook and
+the component.
+
+```bash
+kosui model:hook --modelName sprint --project model-components
+kosui component --name dedicated-container-view --project model-components
+```
+
+## The container model
+
+The generated class is a model like any other, with `@kosContainerAware<TicketModel>()`
+on it. Its container's parent id is the container model's own id, so every ticket added
+to it is a child of the container model.
+
+<Snippet name="ticket-container-decorator@ticket-container-model.ts" />
+
+The collection's logic lives here. Building a ticket, completing the next open one and
+counting are methods and computed model properties of the container model, not of the
+sprint.
+
+<Snippet name="ticket-container-logic@ticket-container-model.ts" />
+
+The registration bean names `Ticket` as a related model, so registering the container
+registers the item too. The app's registration chain lists `TicketContainer` and never
+mentions `Ticket`.
+
+<Snippet name="ticket-container-related@ticket-container-model.ts" />
+
+## Enrolling the child
+
+`@kosChild` on a property makes whatever it holds an owned child: the sprint is not
+ready until the container model is, destroying the sprint destroys the container model
+and its tickets, and the child's context is nested under the sprint's. The property is
+private; the sprint decides what it exposes.
+
+<Snippet name="sprint-child@sprint-model.ts" />
+
+The sprint builds the child in `init`, with an id derived from its own. Nothing is
+passed in the options: the framework links the two through the decorator.
+
+<Snippet name="sprint-build-child@sprint-model.ts" />
+
+The sprint's public surface forwards to the container model. A component reads
+`ticketList` and `openCount` from the sprint and never sees the container model.
+
+<Snippet name="sprint-delegate@sprint-model.ts" />
+
+## Context flows down the graph
+
+The sprint sets one key on its context bean.
+
+<Snippet name="sprint-context-key@sprint-model.ts" />
+
+A ticket two levels down reads it. Lookup walks up the ownership chain, ticket to
+container model to sprint, and stops at the nearest model that set the key. The ticket
+does not take a `kosParentId` option and does not use `@kosParentAware`; compare the
+user on the Parent And Child page, which does both because the team holds the
+container itself.
+
+<Snippet name="ticket-sprint-id@ticket-model.ts" />
+
+## Choosing between the two shapes
+
+- One collection, no logic of its own: `@kosContainerAware` on the concept
+  (`kosui model:add-container`), as on the Container Models page.
+- Several collections, or a collection with its own service load, indexes, topic
+  handlers or methods: a container model per collection, each enrolled with
+  `@kosChild` (`kosui model:add-child`). Adding a second collection to the sprint is
+  one more container model and one more `add-child`; the sprint's class does not
+  change shape.
+
+## The view
+
+<Snippet name="dedicated-container-view@dedicated-container-view.tsx" />
+
+<Snippet name="dedicated-container-story@dedicated-container-view.stories.tsx" />

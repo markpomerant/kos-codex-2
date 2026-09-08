@@ -16,9 +16,14 @@ the call and hands back the result; nothing is retained.
 
 ## How it was built
 
-| Step | Command |
-| ---- | ------- |
-| The request | kos-codegen `add_service_request`: `onStatsLoaded`, `GET /api/codex/objects/stats`, lifecycle LOAD |
+**The request.** The command names the method and the catalog entry `refreshStats`.
+The handler on the model was renamed `onStatsLoaded`; the catalog entry keeps the
+command's name.
+
+```bash
+kosui model:add-service-request --modelName document --project core-concept-models \
+  --methodName refreshStats --servicePath /api/codex/objects/stats --method get --lifecycle LOAD
+```
 
 `GET /api/codex/objects/stats` answers with the object count and the instant it
 was computed, so the timestamp shows whether a response is cached or fresh.

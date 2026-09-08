@@ -21,13 +21,26 @@ runs.
 Only one wrapper applies per handler. The framework checks `debounce`, then
 `throttle`, then `buffer`, then `once`, and uses the first it finds.
 
+## Try it
+
+<Canvas of={Stories.TopicRateStory} sourceState="none" />
+
+Each button asks the codex backend for five events 50 ms apart. **debounce**
+adds one call to `debounceCalls` with a batch of five; **throttle** adds one
+call per window to `throttleCalls`; **buffer** adds five to `bufferItems` in
+one flush.
+
 ## How it was built
 
-| Step | Command |
-| ---- | ------- |
-| Add the counters | kos-codegen `add_property`: `debounceCalls`, `debounceLastBatch`, `throttleCalls`, `bufferItems` |
-| Add the handlers | kos-codegen `add_topic_handler` for `onBurstDebounced`, `onBurstThrottled`, `onBurstBuffered` |
-| Generate the component | `kosui component --name topic-rate-view --project model-components` |
+**Add the counters.** Add `debounceCalls`, `debounceLastBatch`, `throttleCalls` and `bufferItems` as model properties of `widget`.
+
+**Add the handlers.** Add a topic handler on `widget` for `onBurstDebounced`, `onBurstThrottled` and `onBurstBuffered`.
+
+**Generate the component.**
+
+```bash
+kosui component --name topic-rate-view --project model-components
+```
 
 Each snippet below shows the counter(s) the handler writes together with the
 handler itself.
@@ -66,5 +79,3 @@ method is then called once per buffered event.
 <Snippet name="topic-rate-view@topic-rate-view.tsx" />
 
 <Snippet name="topic-rate-story@topic-rate-view.stories.tsx" />
-
-<Canvas of={Stories.TopicRateStory} sourceState="none" />

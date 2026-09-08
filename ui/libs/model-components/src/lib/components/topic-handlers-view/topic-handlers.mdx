@@ -16,14 +16,34 @@ component reading that state re-renders.
 a set of plain fields, one per handler, so each page can show what its
 handler did.
 
+## Try it
+
+<Canvas of={Stories.TopicHandlersStory} sourceState="none" />
+
+The "device" strip is story apparatus. Its buttons call the `device` model,
+whose service requests ask the codex backend to publish the event, so it
+arrives over the websocket like any device event. `publishLocal` publishes on
+the in-app EventBus and never reaches the socket.
+Press each button and watch the matching field change.
+
 ## How it was built
 
-| Step | Command |
-| ---- | ------- |
-| Scaffold the model | `kosui model --name widget --project core-concept-models` |
-| Add the state fields | kos-codegen `add_property`: `temperature: number`, `pings: number`, `rawEvent: string` |
-| Add the handlers | kos-codegen `add_topic_handler` once per handler: a name, a topic and the payload type |
-| Register, hook, component | `register_model`, `kosui model:hook --modelName widget`, `kosui component --name topic-handlers-view` |
+**Scaffold the model.**
+
+```bash
+kosui model --name widget --project core-concept-models
+```
+
+**Add the state fields.** Add `temperature: number`, `pings: number` and `rawEvent: string` as model properties of `widget`.
+
+**Add the handlers.** Add a topic handler on `widget` once per handler: a name, a topic and the payload type.
+
+**Register, hook, component.** Register `widget` in the app's registration chain, then generate the hook and the component.
+
+```bash
+kosui model:hook --modelName widget --project model-components
+kosui component --name topic-handlers-view --project model-components
+```
 
 Each handler starts as the decorator and a method whose body you fill in;
 the event types live in the model's `types/index.d.ts`. The snippets below
@@ -76,14 +96,6 @@ not an option an application handler reaches for.
 <Snippet name="topic-handlers-view@topic-handlers-view.tsx" />
 
 <Snippet name="topic-handlers-story@topic-handlers-view.stories.tsx" />
-
-<Canvas of={Stories.TopicHandlersStory} sourceState="none" />
-
-The "device" strip is story apparatus. Its buttons call the `device` model,
-whose service requests ask the codex backend to publish the event, so it
-arrives over the websocket like any device event. `publishLocal` publishes on
-the in-app EventBus and never reaches the socket.
-Press each button and watch the matching field change.
 
 ## One handler per topic
 

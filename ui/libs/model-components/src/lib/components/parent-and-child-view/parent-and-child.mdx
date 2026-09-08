@@ -15,13 +15,27 @@ container) nests the context when the child is resolved. `@kosParentAware`
 nests it earlier, at construction and before the child's `init()`, so a child
 can reach up during its own lifecycle.
 
+## Try it
+
+<Canvas of={Stories.ParentAndChildStory} sourceState="none" />
+
+Press **add member**. Each user line shows the team id it read from context and
+the id of the parent model it reached through `team`, and both match the team
+above.
+
 ## How it was built
 
-| Step | Command |
-| ---- | ------- |
-| The child | `kosui model --name user --parent-aware` (kos-codegen `scaffold_model` with `parentAware: true`) |
-| The parent sets a key | the team's constructor writes `teamId` to its context bean |
-| The parent enrolls the child | the team builds each user with `kosParentId: this.id`, the option `@kosParentAware` reads |
+**The child.** Scaffolded parent-aware. An existing model gains the same decorator
+with the second command.
+
+```bash
+kosui model --name user --project core-concept-models --parentAware
+kosui model:add-parent-aware --modelName user --project core-concept-models
+```
+
+**The parent sets a key.** The team's constructor writes `teamId` to its context bean.
+
+**The parent enrolls the child.** The team builds each user with `kosParentId: this.id`, the option `@kosParentAware` reads.
 
 ## Declaring the child
 
@@ -73,8 +87,6 @@ when the child is built.
 <Snippet name="parent-and-child-view@parent-and-child-view.tsx" />
 
 <Snippet name="parent-and-child-view-story@parent-and-child-view.stories.tsx" />
-
-<Canvas of={Stories.ParentAndChildStory} sourceState="none" />
 
 ## When the option is named differently
 

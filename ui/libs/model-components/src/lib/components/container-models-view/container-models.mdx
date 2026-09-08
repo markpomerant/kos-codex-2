@@ -15,14 +15,45 @@ change it.
 `team` owns `user` models. The team creates them, adds them, removes and
 destroys them; no code outside the team modifies the collection.
 
+## Try it
+
+<Canvas of={Stories.ContainerModelsStory} sourceState="none" />
+
+Press **add member** and a user is built and added to the team; **remove last**
+takes the newest one out. The list is the container's `data` array, read by
+the view.
+
 ## How it was built
 
-| Step | Command |
-| ---- | ------- |
-| Scaffold both models | `kosui model --name team`, `kosui model --name user --parent-aware` (the parent-and-child page covers the flag) |
-| Put the container on the team | kos-codegen `add_container_support`: child `UserModel` |
-| Own a single child too | kos-codegen `add_child`: property `lead`, child `UserModel`, shape single |
-| Register, hooks, component | `register_model` ×2, `kosui model:hook` ×2, `kosui component --name container-models-view` |
+**Scaffold both models.** The parent-and-child page covers `--parentAware`.
+
+```bash
+kosui model --name team --project core-concept-models
+kosui model --name user --project core-concept-models --parentAware
+```
+
+**Put the container on the team.** The team is the concept that owns the collection,
+so the decorator goes on `team` itself. The command writes `@kosContainerAware<UserModel>()`
+above the class, adds `KosContainerAware<UserModel>` to the merged interface and imports
+the child type; the two sections after this one show the result.
+
+```bash
+kosui model:add-container --modelName team --project core-concept-models --childModel user
+```
+
+`kosui model --container` and `kosui model:container` build the other shape: a separate
+`<model>-container` model that manages the collection without being a new concept. The
+Dedicated Container Model page builds that shape.
+
+**Own a single child too.** A single child on `team`: property `lead`, child `UserModel`.
+
+**Register, hooks, component.** Register `team` and `user` in the app's registration chain.
+
+```bash
+kosui model:hook --modelName team --project model-components
+kosui model:hook --modelName user --project model-components
+kosui component --name container-models-view --project model-components
+```
 
 ## The decorator
 
@@ -93,8 +124,6 @@ when a member is added or removed.
 <Snippet name="container-models-view@container-models-view.tsx" />
 
 <Snippet name="container-models-view-story@container-models-view.stories.tsx" />
-
-<Canvas of={Stories.ContainerModelsStory} sourceState="none" />
 
 ## Migration and naming options
 

@@ -17,14 +17,29 @@ sources, and the view does none of the work:
 - the **binding**, which may pin a conversion and a format in place of the
   defaults.
 
+## Try it
+
+<Canvas of={Stories.ConfigConversionStory} sourceState="none" />
+
+Switch the unit system to `si` and watch `volume` stop converting while
+`otherVolume`, pinned to fluid ounces, keeps converting but changes its
+formatting. `rangeInterval` swaps its range and decimals with the system.
+Writes are always in the display unit: setting 12 while in fluid ounces
+stores 355 ml.
+
 ## How it was built
 
-| Step | Command |
-| ---- | ------- |
-| The region | kos-codegen `describe_sdk_model region-info`, then `add_dependency` with the wiring it returns |
-| The bindings | kos-codegen `add_config_property` on `widget` for `volume`, `other_volume` and `unitSystemRangeInterval` on `studio:service:codex` |
-| The service paths | the app's registration maps config to `/api/config` and regions to `/api/regions` on the codex backend |
-| The component | `kosui component --name config-conversion-view` |
+**The region.** Look up the SDK's `region-info` model, then add it as a dependency of `widget` with the wiring it describes.
+
+**The bindings.** Add a config property on `widget` for each of `volume`, `other_volume` and `unitSystemRangeInterval`, on `studio:service:codex`.
+
+**The service paths.** The app's registration maps config to `/api/config` and regions to `/api/regions` on the codex backend.
+
+**The component.**
+
+```bash
+kosui component --name config-conversion-view --project model-components
+```
 
 ## Regions and unit systems
 
@@ -117,11 +132,3 @@ offers, and `optionsExpander` replaces or filters them.
 ## The view
 
 <Snippet name="config-conversion-view@config-conversion-view.tsx" />
-
-<Canvas of={Stories.ConfigConversionStory} sourceState="none" />
-
-Switch the unit system to `si` and watch `volume` stop converting while
-`otherVolume`, pinned to fluid ounces, keeps converting but changes its
-formatting. `rangeInterval` swaps its range and decimals with the system.
-Writes are always in the display unit: setting 12 while in fluid ounces
-stores 355 ml.

@@ -16,23 +16,69 @@ The `document` model talks to the codex backend: a list of objects at
 session. The backend derives each object's description as `id=N revision=R`,
 so a modification shows up as a bumped revision.
 
+## Try it
+
+<Canvas of={Stories.ServicesStory} sourceState="none" />
+
+Press **add note** and a note appears, built from the object the backend
+returned; **modify first** bumps its revision from the returned object;
+**remove last** takes it out on the bare success. No request re-reads the list.
+
 ## How it was built
 
-| Step | Command |
-| ---- | ------- |
-| Pull the codex backend's API types | `kosui api:generate --project=core-concept-models --studio --host=http://127.0.0.1:10010` |
-| Scaffold the model | `kosui model --name document --project core-concept-models` |
-| Give it the notes container | kos-codegen `add_container_support`: property `notes`, child `NoteModel` |
-| Add the requests | kos-codegen `add_service_request` once per method: the path, the HTTP method, and either a lifecycle or "method" mode |
-| Register, hook, component | `register_model`, `kosui model:hook --modelName document`, `kosui component --name services-view` |
+**Pull the codex backend's API types.** The request commands validate every path
+against this catalog.
 
-`add_service_request` writes three things: a catalog entry in the model's
+```bash
+kosui api:generate --project core-concept-models --studio --host http://127.0.0.1:10010
+```
+
+**Scaffold the model.**
+
+```bash
+kosui model --name document --project core-concept-models
+```
+
+**Give it the notes container.** `modelsProperty` and the extension id were added by
+hand afterwards; the Container Models page covers those options.
+
+```bash
+kosui model:add-container --modelName document --project core-concept-models --childModel note --containerProperty notes
+```
+
+**Add the requests.** One command per method. `--lifecycle LOAD` runs the request when
+the model loads; without it the request runs when the method is called.
+
+```bash
+kosui model:add-service-request --modelName document --project core-concept-models \
+  --methodName onNotesLoaded --servicePath /api/codex/objects --method get --lifecycle LOAD
+kosui model:add-service-request --modelName document --project core-concept-models \
+  --methodName addNote --servicePath /api/codex/objects --method post
+kosui model:add-service-request --modelName document --project core-concept-models \
+  --methodName modifyNote --servicePath /api/codex/objects/{id} --method put
+kosui model:add-service-request --modelName document --project core-concept-models \
+  --methodName removeNote --servicePath /api/codex/objects/{id} --method delete
+kosui model:add-service-request --modelName document --project core-concept-models \
+  --methodName refreshStats --servicePath /api/codex/objects/stats --method get --lifecycle LOAD
+kosui model:add-service-request --modelName document --project core-concept-models \
+  --methodName loadNote --servicePath /api/codex/objects/{id} --method get
+```
+
+**Register, hook, component.** Register `document` in the app's registration chain,
+then generate the hook and the component.
+
+```bash
+kosui model:hook --modelName document --project model-components
+kosui component --name services-view --project model-components
+```
+
+`kosui model:add-service-request` writes three things: a catalog entry in the model's
 `services/` module, a data type plus an identity mapper for that endpoint, and
 the decorated method with a TODO body. The mapper converts the wire shape into
 the model's shape. It starts as the identity, and `executeServiceRequest`
 returns whatever the mapper returns, so editing the mapper changes the type the
-method receives. `add_service_request` rejects a path the generated types do
-not declare, so every catalog entry matches the spec.
+method receives. The command rejects a path the generated types do not
+declare, so every catalog entry matches the spec.
 
 ## The endpoint catalog
 
@@ -74,9 +120,9 @@ decorator has a default.
 
 Without `lifecycle` the request runs when the method is called. Caller
 arguments come first, and the framework injects an execution context as the
-last parameter. This is the shape `add_service_request` leaves behind for
-`addNote`: the decorator with only the endpoint and its mapper, the signature,
-and a body to fill in.
+last parameter. This is the shape `addNote` starts from when a service
+request is added to a model: the decorator with only the endpoint and its
+mapper, the signature, and a body to fill in.
 
 <Snippet name="service-method@document-model.ts" />
 
@@ -136,9 +182,3 @@ in milliseconds.
 <Snippet name="services-view@services-view.tsx" />
 
 <Snippet name="services-view-story@services-view.stories.tsx" />
-
-<Canvas of={Stories.ServicesStory} sourceState="none" />
-
-Press **add note** and a note appears, built from the object the backend
-returned; **modify first** bumps its revision from the returned object;
-**remove last** takes it out on the bare success. No request re-reads the list.

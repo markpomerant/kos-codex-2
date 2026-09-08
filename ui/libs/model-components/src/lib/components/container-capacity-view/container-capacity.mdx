@@ -17,14 +17,38 @@ oldest, `lru` the least recently read, and `custom` asks
 `project` keeps at most five `task` models and evicts from the tasks already
 done.
 
+## Try it
+
+<Canvas of={Stories.ContainerCapacityStory} sourceState="none" />
+
+Add three open tasks and two done ones: the container holds five and evicts
+none. Add a sixth and the container is over capacity by one, so it evicts one
+candidate from the custom filter, a done task, and returns to five.
+
 ## How it was built
 
-| Step | Command |
-| ---- | ------- |
-| Scaffold | `kosui model --name project`, `kosui model --name task --future-aware complete` |
-| The container | kos-codegen `add_container_support`: property `tasks`, child `TaskModel` |
-| The capacity | `maxCapacity`, `evictionBatchSize`, `evictionStrategy` and `customEvictionFilter` added to `containerOptions` |
-| Register, hook, component | `register_model` ×2, `kosui model:hook --modelName project`, `kosui component --name container-capacity-view` |
+**Scaffold.**
+
+```bash
+kosui model --name project --project core-concept-models
+kosui model --name task --project core-concept-models --futureAware complete
+```
+
+**The container.** `--containerProperty tasks` names the injected container `tasks`
+and types the merged interface as `KosContainerAwareWithProp<TaskModel, 'tasks'>`.
+
+```bash
+kosui model:add-container --modelName project --project core-concept-models --childModel task --containerProperty tasks
+```
+
+**The capacity.** `maxCapacity`, `evictionBatchSize`, `evictionStrategy` and `customEvictionFilter` added to `containerOptions`.
+
+**Register, hook, component.** Register `project` and `task` in the app's registration chain.
+
+```bash
+kosui model:hook --modelName project --project model-components
+kosui component --name container-capacity-view --project model-components
+```
 
 ## The container
 
@@ -74,9 +98,3 @@ length before and after the add to count how many tasks were evicted.
 ## The story
 
 <Snippet name="container-capacity-view-story@container-capacity-view.stories.tsx" />
-
-<Canvas of={Stories.ContainerCapacityStory} sourceState="none" />
-
-Add three open tasks and two done ones: the container holds five and evicts
-none. Add a sixth and the container is over capacity by one, so it evicts one
-candidate from the custom filter, a done task, and returns to five.

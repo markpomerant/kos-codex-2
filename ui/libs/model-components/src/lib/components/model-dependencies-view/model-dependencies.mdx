@@ -23,15 +23,36 @@ topics, call the owner's endpoints or copy the owner's data; the owner does
 that work once, and every dependent follows it through computed properties
 (the Computed Properties page).
 
+## Try it
+
+<Canvas of={Stories.ModelDependenciesStory} sourceState="none" />
+
+The team was created from the dependency's options before the project
+initialised. The counter row shows a limitation of the SDK: the `CONTINUE`
+policy is applied when a dependency is resolved during a lifecycle phase, but
+the injection performed at construction creates the model regardless, so a
+counter exists here even though none did before.
+
 ## How it was built
 
-| Step | Command |
-| ---- | ------- |
-| Scaffold | `kosui model --name project --project core-concept-models` |
-| The widget | kos-codegen `add_dependency`: property `widget`, type `WidgetModel`, ref `Widget.type`, id `widget-computed` |
-| The team | kos-codegen `add_dependency`: property `team`, type `TeamModel`, ref `Team.type`, id `project-team`; `options` added to the decorator, the id later replaced by a PropKey |
-| The counter | kos-codegen `add_dependency`: property `counter`, type `CounterModel`, ref `Counter.type`, id `project-counter`; `resolutionPolicy: CONTINUE` and `lifecycle: READY` added |
-| Register, hook, component | `register_model`, `kosui model:hook --modelName project`, `kosui component --name model-dependencies-view` |
+**Scaffold.**
+
+```bash
+kosui model --name project --project core-concept-models
+```
+
+**The widget.** A dependency on `project`: property `widget`, type `WidgetModel`, ref `Widget.type`, id `widget-computed`.
+
+**The team.** A dependency on `project`: property `team`, type `TeamModel`, ref `Team.type`, id `project-team`; `options` added to the decorator, the id later replaced by a PropKey.
+
+**The counter.** A dependency on `project`: property `counter`, type `CounterModel`, ref `Counter.type`, id `project-counter`; `resolutionPolicy: CONTINUE` and `lifecycle: READY` added.
+
+**Register, hook, component.** Register `project` in the app's registration chain.
+
+```bash
+kosui model:hook --modelName project --project model-components
+kosui component --name model-dependencies-view --project model-components
+```
 
 ## The minimal form
 
@@ -101,11 +122,3 @@ optional one resolved to.
 ## The view
 
 <Snippet name="model-dependencies-view@model-dependencies-view.tsx" />
-
-<Canvas of={Stories.ModelDependenciesStory} sourceState="none" />
-
-The team was created from the dependency's options before the project
-initialised. The counter row shows a limitation of the SDK: the `CONTINUE`
-policy is applied when a dependency is resolved during a lifecycle phase, but
-the injection performed at construction creates the model regardless, so a
-counter exists here even though none did before.

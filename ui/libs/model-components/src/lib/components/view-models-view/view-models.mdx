@@ -16,16 +16,31 @@ a data model is, without registering it or putting it in the model graph.
 A component creates one with `useViewModel`, giving it the data models it
 reads from; the instance lives as long as the component.
 
+## Try it
+
+<Canvas of={Stories.ViewModelsStory} sourceState="none" />
+
+Push a temperature event and the display follows; toggle the unit and only
+the ViewModel changes.
+
 ## How it was built
 
-| Step | Command |
-| ---- | ------- |
-| The class | `WidgetTemperatureViewModel`, written beside the widget model; there is no generator for view models |
-| The decorator | `@kosViewModel` on the class, with `@kosLoggerAware` for a logger |
-| The state | a `unit` field and a constructor that takes the data model |
-| The computed values | `display` and `isHot`, read from the data model and the unit |
-| The action | `toggleUnit`, which changes only ViewModel state |
-| The component | `kosui component --name view-models-view` |
+**The class.** `WidgetTemperatureViewModel`, written beside the widget model; there is
+no generator for view models.
+
+**The decorator.** `@kosViewModel` on the class, with `@kosLoggerAware` for a logger.
+
+**The state.** A `unit` field and a constructor that takes the data model.
+
+**The computed values.** `display` and `isHot`, read from the data model and the unit.
+
+**The action.** `toggleUnit`, which changes only ViewModel state.
+
+**The component.**
+
+```bash
+kosui component --name view-models-view --project model-components
+```
 
 ## The decorator
 
@@ -74,8 +89,3 @@ The data model still arrives as a prop through the generated HOC; the
 ViewModel is built from it.
 
 <Snippet name="view-models-view@view-models-view.tsx" />
-
-<Canvas of={Stories.ViewModelsStory} sourceState="none" />
-
-Push a temperature event and the display follows; toggle the unit and only
-the ViewModel changes.

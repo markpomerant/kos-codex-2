@@ -34,7 +34,7 @@
         "condition",
         "skipParse"
       ],
-      "reason": "Marked @deprecated and @internal in SDK source (kosSubscribe.ts: warnDeprecated → replacement @kosTopicHandler, removeAt 3). The codex must not teach a decorator scheduled for removal."
+      "reason": "Marked @deprecated and @internal in SDK source (kosSubscribe.ts: warnDeprecated \u2192 replacement @kosTopicHandler, removeAt 3). The codex must not teach a decorator scheduled for removal."
     },
     "kosTopicHandler": {
       "options": [
@@ -242,6 +242,19 @@
         "kosChild": []
       },
       "teaches": "A container owns a collection and the events that change it, and what the decorator injects can be renamed or trimmed."
+    },
+    {
+      "page": "dedicated-container-model",
+      "models": [
+        "sprint",
+        "ticket",
+        "ticket-container"
+      ],
+      "claims": {
+        "kosChild": [],
+        "kosContainerAware": []
+      },
+      "teaches": "A concept model owns its collection through a dedicated container model enrolled with @kosChild; the collection's logic lives in the container model and the items reach the owner through context."
     },
     {
       "page": "container-indexes",

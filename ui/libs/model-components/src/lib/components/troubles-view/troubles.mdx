@@ -16,13 +16,20 @@ interface: `pathProperty` names the field holding that interface path, and
 the decorator injects `troubles` and `troublesByType`, read from the SDK's
 trouble container.
 
+## Try it
+
+<Canvas of={Stories.TroublesStory} sourceState="none" />
+
+Raise a trouble on `codex.session` and it appears on the session. Clear it
+by id and it is removed.
+
 ## How it was built
 
-| Step | Command |
-| ---- | ------- |
-| The decorator | written on `session`; there is no mutator for it |
-| The service path | the codex backend hosts troubles at `/api/troubles`; the session passes that path to the trouble container through a `@kosDependency` with `options` (kos-codegen `add_dependency`, the option added to the decorator) |
-| The backend side | a `Trouble` subclass on the codex backend implementing the `path` interface, raised and removed through the backend's trouble service by two test endpoints; the `device` model calls them |
+**The decorator.** Written on `session` by hand.
+
+**The service path.** The codex backend hosts troubles at `/api/troubles`; the session passes that path to the trouble container through a `@kosDependency` with `options` (a dependency added to `session`, then the option added to the decorator).
+
+**The backend side.** A `Trouble` subclass on the codex backend implementing the `path` interface, raised and removed through the backend's trouble service by two test endpoints; the `device` model's `raiseTrouble` and `removeTrouble` requests (POST `/api/codex/test/troubles/raise` and `/api/codex/test/troubles/remove`) call them.
 
 ## What a trouble carries
 
@@ -87,8 +94,3 @@ strip resolves the first trouble on the session that way. A trouble that is
 not resolvable stays until the service that raised it removes it.
 
 <Snippet name="troubles-view-story@troubles-view.stories.tsx" />
-
-<Canvas of={Stories.TroublesStory} sourceState="none" />
-
-Raise a trouble on `codex.session` and it appears on the session. Clear it
-by id and it is removed.

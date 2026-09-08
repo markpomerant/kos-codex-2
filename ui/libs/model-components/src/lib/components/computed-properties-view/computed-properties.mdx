@@ -19,13 +19,29 @@ computed property. The consuming model never subscribes to a topic, never
 calls an endpoint and never copies the value; the model that owns the data
 does that work once, and every consumer follows it.
 
+## Try it
+
+<Canvas of={Stories.ComputedPropertiesStory} sourceState="none" />
+
+The strips act on the team, the counter and the device, never on the project.
+The panel's background follows the counter's parity and its left border the
+widget's temperature band.
+
 ## How it was built
 
-| Step | Command |
-| ---- | ------- |
-| A computed property over the model's own state | kos-codegen `add_computed` on `counter`: `isAtFloor(): boolean` |
-| Computed properties over dependencies | kos-codegen `add_dependency` on `project` for the widget, then `add_computed`: `teamSize`, `counterParity`, `temperatureBand`, each reading a model that `add_dependency` injected |
-| Hook, component, story | `kosui model:hook --modelName project`, `kosui component --name computed-properties-view` |
+**A computed property over the model's own state.** Add `isAtFloor(): boolean` as a
+computed model property of `counter`.
+
+**Computed properties over dependencies.** Add a dependency on the widget to `project`,
+then add `teamSize`, `counterParity` and `temperatureBand` as computed model
+properties, each reading one of the injected dependencies.
+
+**Hook, component, story.**
+
+```bash
+kosui model:hook --modelName project --project model-components
+kosui component --name computed-properties-view --project model-components
+```
 
 ## Over the model's own state
 
@@ -69,12 +85,6 @@ render; the model it renders exposes what it needs as a computed property.
 
 ## The view
 
-The strips act on the team, the counter and the device, never on the project.
-The panel's background follows the counter's parity and its left border the
-widget's temperature band.
-
 <Snippet name="computed-properties-view@computed-properties-view.tsx" />
 
 <Snippet name="computed-properties-story@computed-properties-view.stories.tsx" />
-
-<Canvas of={Stories.ComputedPropertiesStory} sourceState="none" />

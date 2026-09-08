@@ -20,14 +20,27 @@ Two forms exist:
 - `createPropKey<Model>('name')` produces `{PROP_name}`, which is replaced
   with `instance.name`. The type argument checks that the property exists.
 
+## Try it
+
+<Canvas of={Stories.PropKeysStory} sourceState="none" />
+
+Two widgets, two zones. Each device button publishes on one instance's topic
+and only that instance's counter moves.
+
 ## How it was built
 
-| Step | Command |
-| ---- | ------- |
-| The computed property | kos-codegen `add_computed` on `widget`: `zone`, derived from the id |
-| The handlers | kos-codegen `add_topic_handler` twice: `onOwnReading` on `/codex/widget/{MODEL_ID}/reading`, and `onZoneStatus` on a topic constant built with `createPropKey` |
-| The dependency | on `project`, kos-codegen `add_property` for `teamKey` and the existing `add_dependency`, with its `id` changed to `createPropKey<ProjectModelImpl>('teamKey')` |
-| The counters | kos-codegen `add_property` for `ownReadings` and `zoneEvents` |
+**The computed property.** Add `zone` as a computed model property of `widget`,
+derived from the id.
+
+**The handlers.** Add two topic handlers on `widget`: `onOwnReading` on
+`/codex/widget/{MODEL_ID}/reading`, and `onZoneStatus` on a topic constant built with
+`createPropKey`.
+
+**The dependency.** Add `teamKey` as a model property of `project`, then change the
+`id` of the existing dependency on `project` to
+`createPropKey<ProjectModelImpl>('teamKey')`.
+
+**The counters.** Add `ownReadings` and `zoneEvents` as model properties of `widget`.
 
 ## Where a PropKey is substituted
 
@@ -73,11 +86,6 @@ mechanism on topics and dependencies.
 
 ## The view
 
-Two widgets, two zones. Each device button publishes on one instance's topic
-and only that instance's counter moves.
-
 <Snippet name="prop-keys-view@prop-keys-view.tsx" />
 
 <Snippet name="prop-keys-story@prop-keys-view.stories.tsx" />
-
-<Canvas of={Stories.PropKeysStory} sourceState="none" />

@@ -17,13 +17,25 @@ Renaming the logger has one constraint. The SDK's `executeServiceRequest` helper
 reads a `logger` property on the model, so a model with service requests
 keeps the default name. `session` has no service requests, so it renames.
 
+## Try it
+
+<Canvas of={Stories.LoggingStory} sourceState="none" />
+
+Open the browser console and press **log a line**: the line is filed under
+the `codex.session` context.
+
 ## How it was built
 
-| Step | Command |
-| ---- | ------- |
-| The default | `@kosLoggerAware()` comes from the scaffold; `counter` shows it |
-| The options | `loggerProperty`, `loggerContext` and `@kosLogger` are written on `session` |
-| The component | `kosui component --name logging-view` |
+**The default.** `@kosLoggerAware()` comes from the scaffold; `counter` shows it.
+
+**The options.** `loggerProperty`, `loggerContext` and `@kosLogger` are written on
+`session`.
+
+**The component.**
+
+```bash
+kosui component --name logging-view --project model-components
+```
 
 ## The logger
 
@@ -72,8 +84,3 @@ lines it has written so the view has a value to display.
 <Snippet name="logging-view@logging-view.tsx" />
 
 <Snippet name="logging-view-story@logging-view.stories.tsx" />
-
-<Canvas of={Stories.LoggingStory} sourceState="none" />
-
-Open the browser console and press **log a line**: the line is filed under
-the `codex.session` context.

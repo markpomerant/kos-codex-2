@@ -10,6 +10,14 @@ import * as Stories from "./context-and-reload-view.stories";
 Two decorators take no options. One adds an argument to a method call; the
 other changes what the framework does with the model on reconnect.
 
+## Try it
+
+<Canvas of={Stories.ContextAndReloadStory} sourceState="none" />
+
+Press **reload()** and the count climbs while the notes list keeps its
+models. Press **describeContext()** and `contextNote` names the bean the
+call received.
+
 ## @kosContext
 
 A method decorated with `@kosContext` receives the model's context bean as
@@ -42,9 +50,3 @@ survive the reload.
 <Snippet name="context-and-reload-view@context-and-reload-view.tsx" />
 
 <Snippet name="context-and-reload-view-story@context-and-reload-view.stories.tsx" />
-
-<Canvas of={Stories.ContextAndReloadStory} sourceState="none" />
-
-Press **reload()** and the count climbs while the notes list keeps its
-models. Press **describeContext()** and `contextNote` names the bean the
-call received.

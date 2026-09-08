@@ -14,14 +14,31 @@ a property. Both are reactive: a computed property that reads an index
 recomputes when the bucket changes, including when a key appears for the
 first time.
 
+## Try it
+
+<Canvas of={Stories.ContainerIndexesStory} sourceState="none" />
+
+Press **add admin** or **add member**. The new user lands in the row for its
+role, read from the `role` index, and its initials appear in the sorted
+`initials` row.
+
 ## How it was built
 
-| Step | Command |
-| ---- | ------- |
-| The container | kos-codegen `add_container_support`: child `UserModel` (the container-models page) |
-| The indexes | `indexMap` added to `containerOptions` |
-| Sorting | `sortKey` added to the same block |
-| The component | `kosui component --name container-indexes-view` |
+**The container.** The Container Models page covers this step.
+
+```bash
+kosui model:add-container --modelName team --project core-concept-models --childModel user --sortKey name
+```
+
+**The indexes.** `indexMap` added to `containerOptions` by hand.
+
+**Sorting.** `--sortKey name` above wrote `containerOptions: { sortKey: 'name' }`.
+
+**The component.**
+
+```bash
+kosui component --name container-indexes-view --project model-components
+```
 
 ## The indexes
 
@@ -62,5 +79,3 @@ insertion order.
 <Snippet name="container-indexes-view@container-indexes-view.tsx" />
 
 <Snippet name="container-indexes-view-story@container-indexes-view.stories.tsx" />
-
-<Canvas of={Stories.ContainerIndexesStory} sourceState="none" />

@@ -21,13 +21,26 @@ page:
 - `rateLimit` with `onExceeded: "drop"` discards the excess events; it does
   not delay or coalesce them, which separates it from `throttle`.
 
+## Try it
+
+<Canvas of={Stories.TopicFlowStory} sourceState="none" />
+
+Each button asks the codex backend for a burst of events. **burst 4 → batch**
+fills `flowBatches` and `flowBatchSum`; **burst 5 → rate limit** raises
+`flowAccepted` by the events that fit the window; **burst 2 → retry** raises
+`flowAttempts` past `flowSucceeded` as the handler is retried.
+
 ## How it was built
 
-| Step | Command |
-| ---- | ------- |
-| Add the counters | kos-codegen `add_property`: `flowBatches`, `flowBatchSum`, `flowAccepted`, `flowAttempts`, `flowSucceeded` |
-| Add the handlers | kos-codegen `add_topic_handler` for `onFlowBatch`, `onFlowLimited`, `onFlowRetried` |
-| Generate the component | `kosui component --name topic-flow-view --project model-components` |
+**Add the counters.** Add `flowBatches`, `flowBatchSum`, `flowAccepted`, `flowAttempts` and `flowSucceeded` as model properties of `widget`.
+
+**Add the handlers.** Add a topic handler on `widget` for `onFlowBatch`, `onFlowLimited` and `onFlowRetried`.
+
+**Generate the component.**
+
+```bash
+kosui component --name topic-flow-view --project model-components
+```
 
 Each snippet below shows the counter(s) the handler writes together with the
 handler itself.
@@ -72,5 +85,3 @@ successes, and two logged errors.
 <Snippet name="topic-flow-view@topic-flow-view.tsx" />
 
 <Snippet name="topic-flow-story@topic-flow-view.stories.tsx" />
-
-<Canvas of={Stories.TopicFlowStory} sourceState="none" />

@@ -12,13 +12,25 @@ in what shape: `condition`, `filter`, `transform` and `once`. `condition` and
 `filter` drop events, `transform` reshapes the payload, and `once` limits the
 handler to the first matching event.
 
+## Try it
+
+<Canvas of={Stories.TopicFilteringStory} sourceState="none" />
+
+An alert of 25 leaves `alerts` alone; 35 increments it. Six samples yield
+three even ones. The second "first event" changes nothing. The two readings
+render as `21.5 °C (mild)` and `34.0 °C (hot)`.
+
 ## How it was built
 
-| Step | Command |
-| ---- | ------- |
-| Add the state fields | kos-codegen `add_property`: `threshold`, `alerts`, `evenSamples`, `firstEventAt`, `reading` |
-| Add the handlers | kos-codegen `add_topic_handler` for `onHighTemperature`, `onEvenSample`, `onFirstEvent`, `onReading`, each on its own topic |
-| Generate the component | `kosui component --name topic-filtering-view --project model-components` |
+**Add the state fields.** Add `threshold`, `alerts`, `evenSamples`, `firstEventAt` and `reading` as model properties of `widget`.
+
+**Add the handlers.** Add a topic handler on `widget` for `onHighTemperature`, `onEvenSample`, `onFirstEvent` and `onReading`, each on its own topic.
+
+**Generate the component.**
+
+```bash
+kosui component --name topic-filtering-view --project model-components
+```
 
 Each snippet below shows the field the handler writes together with the
 handler itself.
@@ -68,9 +80,3 @@ order. A handler with both `debounce` and `once` is only debounced.
 <Snippet name="topic-filtering-view@topic-filtering-view.tsx" />
 
 <Snippet name="topic-filtering-story@topic-filtering-view.stories.tsx" />
-
-<Canvas of={Stories.TopicFilteringStory} sourceState="none" />
-
-An alert of 25 leaves `alerts` alone; 35 increments it. Six samples yield
-three even ones. The second "first event" changes nothing. The two readings
-render as `21.5 °C (mild)` and `34.0 °C (hot)`.

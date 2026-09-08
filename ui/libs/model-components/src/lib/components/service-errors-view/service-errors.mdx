@@ -13,11 +13,24 @@ default), `log` and `ignore` swallow the error and hand the method
 `defaultValue` instead. `onError(error, model)` always runs first; for an HTTP
 failure the error carries `status`, `statusText` and the response body.
 
+## Try it
+
+<Canvas of={Stories.ServiceErrorsStory} sourceState="none" />
+
+**load note 1** loads a note that exists (add one on the services page first).
+**load note 999** asks for an id the backend does not hold: success, no
+payload, and the readout says so. **load note abc** sends an id the backend cannot
+parse; it answers with a failure, `onError` records the status, the method sees
+no data and returns.
+
 ## How it was built
 
-| Step | Command |
-| ---- | ------- |
-| The request | kos-codegen `add_service_request`: `loadNote`, `GET /api/codex/objects/{id}`, "method" mode |
+**The request.**
+
+```bash
+kosui model:add-service-request --modelName document --project core-concept-models \
+  --methodName loadNote --servicePath /api/codex/objects/{id} --method get
+```
 
 `GET /api/codex/objects/{id}` returns one object. For an id the backend does
 not hold it answers success with no payload, which is not an error. The client
@@ -62,11 +75,3 @@ hands back `null`.
 <Snippet name="service-errors-view@service-errors-view.tsx" />
 
 <Snippet name="service-errors-view-story@service-errors-view.stories.tsx" />
-
-<Canvas of={Stories.ServiceErrorsStory} sourceState="none" />
-
-**load note 1** loads a note that exists (add one on the services page first).
-**load note 999** asks for an id the backend does not hold: success, no
-payload, and the readout says so. **load note abc** sends an id the backend cannot
-parse; it answers with a failure, `onError` records the status, the method sees
-no data and returns.
