@@ -1,0 +1,94 @@
+import { Canvas, Meta } from "@storybook/addon-docs/blocks";
+
+import { Snippet } from "../../snippet";
+import * as Stories from "./troubles-view.stories";
+
+<Meta title="Device/Troubles" />
+
+# Troubles
+
+A trouble is a marker the backend raises against part of the system, tagged
+with the interfaces it concerns. Some troubles are faults. Others record that
+something has happened and needs attention: a cleaning reminder raised every
+morning, shown when the user opens the admin UI, cleared by the user and
+raised again the next day. Nothing need be broken or service affecting. `@kosTroubleAware` gives a model the troubles for its own
+interface: `pathProperty` names the field holding that interface path, and
+the decorator injects `troubles` and `troublesByType`, read from the SDK's
+trouble container.
+
+## How it was built
+
+| Step | Command |
+| ---- | ------- |
+| The decorator | written on `session`; there is no mutator for it |
+| The service path | the codex backend hosts troubles at `/api/troubles`; the session passes that path to the trouble container through a `@kosDependency` with `options` (kos-codegen `add_dependency`, the option added to the decorator) |
+| The backend side | a `Trouble` subclass on the codex backend implementing the `path` interface, raised and removed through the backend's trouble service by two test endpoints; the `device` model calls them |
+
+## What a trouble carries
+
+A trouble lists the **interfaces** it affects in `ifaces`. Each interface
+name is the id of a trouble mapper, an extension that turns the trouble into
+the model paths it concerns. The SDK ships one called `path`: it reads the
+trouble's top-level `path` field. A trouble with `ifaces: ["path"]` and
+`path: "codex.session"` therefore lands on every model whose interface path is
+`codex.session`. A domain can register its own mappers under other names.
+
+## The decorator
+
+`@kosTroubleAware` sits under `@kosModel`. Its one option, `pathProperty`,
+names the field on the model that holds the interface path.
+
+<Snippet name="session-trouble-aware@session-model.ts" />
+
+## The path
+
+The field the option names is an ordinary property. Its value is the
+interface path troubles are matched against; a session with a different path
+would see different troubles.
+
+<Snippet name="session-trouble-path@session-model.ts" />
+
+## The view
+
+The decorator injects `troubles`, the list for this model's path. The view
+shows the path, the count, and one line per trouble.
+
+<Snippet name="troubles-view@troubles-view.tsx" />
+
+## Where troubles come from
+
+A trouble is raised on the backend, by a service, through the trouble
+service. The codex backend defines one for this page: a `Trouble` subclass
+that implements the `path` interface, reports `codex.session` as its path and
+marks itself resolvable. The service holds the instance; one test endpoint
+adds it through the trouble service, which publishes it on
+`/kos/trouble/add`, and another removes it, which publishes
+`/kos/trouble/remove`. The `device` model's `raiseTrouble` and
+`removeTrouble` requests call those endpoints. Nothing on the client side
+fabricates a trouble.
+
+The trouble container is an SDK singleton that loads `/api/kos/troubles` by
+default. The codex backend hosts troubles at `/api/troubles`, so the session
+declares a dependency on the container with `options: { servicePath:
+'/api/troubles' }`. A property decorator registers before the class
+decorator, so the dependency creates the singleton with that path before
+`@kosTroubleAware` looks it up. From then on the container listens to the two
+topics above.
+
+<Snippet name="session-trouble-service@session-model.ts" />
+
+## Resolving a trouble
+
+A resolvable trouble carries the work that resolves it. On the backend that is
+its `resolve()` override, a `FutureWork`; on the client the trouble model's
+`resolve()` posts to `/api/troubles/resolve/{id}`, the service runs the work,
+removes the trouble on success and publishes the removal. The story's user
+strip resolves the first trouble on the session that way. A trouble that is
+not resolvable stays until the service that raised it removes it.
+
+<Snippet name="troubles-view-story@troubles-view.stories.tsx" />
+
+<Canvas of={Stories.TroublesStory} sourceState="none" />
+
+Raise a trouble on `codex.session` and it appears on the session. Clear it
+by id and it is removed.

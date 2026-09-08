@@ -1,0 +1,80 @@
+import { Canvas, Meta } from "@storybook/addon-docs/blocks";
+
+import { Snippet } from "../../snippet";
+import * as Stories from "./computed-properties-view.stories";
+
+<Meta title="Foundations/Computed Properties" />
+
+# Computed Properties
+
+A computed model property is a value derived from other model properties. It
+is written as a TypeScript getter on the model class. The framework memoises
+it: the getter runs when a property it read has changed, and a component that
+reads it re-renders then.
+
+Computed properties are how models compose. One model is responsible for one
+thing, such as reading the temperature from the device. Any other model that
+needs that reading declares a dependency on it and derives what it needs in a
+computed property. The consuming model never subscribes to a topic, never
+calls an endpoint and never copies the value; the model that owns the data
+does that work once, and every consumer follows it.
+
+## How it was built
+
+| Step | Command |
+| ---- | ------- |
+| A computed property over the model's own state | kos-codegen `add_computed` on `counter`: `isAtFloor(): boolean` |
+| Computed properties over dependencies | kos-codegen `add_dependency` on `project` for the widget, then `add_computed`: `teamSize`, `counterParity`, `temperatureBand`, each reading a model that `add_dependency` injected |
+| Hook, component, story | `kosui model:hook --modelName project`, `kosui component --name computed-properties-view` |
+
+## Over the model's own state
+
+`isAtFloor` derives from `count`. The counter's own `decrement` reads it, and
+so does the view's disabled button, so the rule lives in one place.
+
+<Snippet name="counter-floor@counter-model.ts" />
+
+## Over a dependency
+
+The project depends on a team, on the counter and on a widget. It holds none
+of their data; it reads the injected models inside computed properties. The
+team, the counter and the widget stay responsible for their own state; the
+project consumes it and recomputes when it changes.
+
+<Snippet name={["project-dependency@project-model.ts", "project-widget-dependency@project-model.ts"]} />
+
+`teamSize` reads the team's container. `counterParity` reads the counter's
+`count`. Both change when the source model changes, with nothing subscribed
+to by hand.
+
+<Snippet name={["computed-team-size@project-model.ts", "computed-parity@project-model.ts"]} />
+
+## Over data that arrives on a topic
+
+The widget is responsible for the temperature: its topic handler subscribes
+to the device's topic and stores each event. The project's `temperatureBand`
+reads that property. The project has no handler, no subscription and no
+knowledge of how the value arrives; when a device event changes the widget,
+the project's computed property recomputes and its view re-renders. Any
+number of models can consume the widget's reading the same way, and the
+subscription exists once, on the widget.
+
+<Snippet name={["topic-websocket@widget-model.ts", "computed-temperature-band@project-model.ts"]} />
+
+This is the pattern for cross-model reads: a dependency plus a computed
+property. The model that owns a piece of data does the reading, whether from
+a topic, a service request or a config property, and every other model
+derives from it. A component never queries another model or a container in
+render; the model it renders exposes what it needs as a computed property.
+
+## The view
+
+The strips act on the team, the counter and the device, never on the project.
+The panel's background follows the counter's parity and its left border the
+widget's temperature band.
+
+<Snippet name="computed-properties-view@computed-properties-view.tsx" />
+
+<Snippet name="computed-properties-story@computed-properties-view.stories.tsx" />
+
+<Canvas of={Stories.ComputedPropertiesStory} sourceState="none" />

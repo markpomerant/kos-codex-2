@@ -1,0 +1,66 @@
+import { Canvas, Meta } from "@storybook/addon-docs/blocks";
+
+import { Snippet } from "../../snippet";
+import * as Stories from "./container-indexes-view.stories";
+
+<Meta title="Containers/Container Indexes" />
+
+# Container Indexes
+
+Indexes make a container queryable without scanning it. `indexMap` declares
+named indexes, each either a property name or a function of the model, and
+`getIndexByKey` answers in one bucket lookup. `sortKey` keeps `data` sorted by
+a property. Both are reactive: a computed property that reads an index
+recomputes when the bucket changes, including when a key appears for the
+first time.
+
+## How it was built
+
+| Step | Command |
+| ---- | ------- |
+| The container | kos-codegen `add_container_support`: child `UserModel` (the container-models page) |
+| The indexes | `indexMap` added to `containerOptions` |
+| Sorting | `sortKey` added to the same block |
+| The component | `kosui component --name container-indexes-view` |
+
+## The indexes
+
+`containerOptions` is handed to the container. `indexMap` declares two
+indexes: `byRole` buckets members by the value of their `role` property, and
+`byInitial` buckets them by the value the function returns for each model,
+here the first letter of the name.
+
+<Snippet name="team-indexes@team-model.ts" />
+
+## Querying a property index
+
+`getIndexByKey(index, key)` returns the models in one bucket. The lookup is a
+method on the team; a component calls it for admins instead of filtering
+`team.data` itself. Cross-model reads are computed properties or plain
+methods over the index. Components do not query the container directly.
+
+<Snippet name="team-index-by-role@team-model.ts" />
+
+## Querying a function index
+
+`getIndexKeys(index)` lists the keys an index currently holds. For the
+function-based index that is the set of initials present in the container,
+and it grows when a member with a new initial is added.
+
+<Snippet name="team-index-keys@team-model.ts" />
+
+## Sorting
+
+`sortKey` names the property the container orders `data` by. It sits in the
+same `containerOptions` block as `indexMap`. Without it, `data` is in
+insertion order.
+
+<Snippet name="team-sort-key@team-model.ts" />
+
+## The view
+
+<Snippet name="container-indexes-view@container-indexes-view.tsx" />
+
+<Snippet name="container-indexes-view-story@container-indexes-view.stories.tsx" />
+
+<Canvas of={Stories.ContainerIndexesStory} sourceState="none" />

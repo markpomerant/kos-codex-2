@@ -1,0 +1,6 @@
+{
+  "default_keyset": "prod.kos",
+  "build_cmd": "./build/build-java.sh",
+
+  "artifacts": []
+}

@@ -1,0 +1,75 @@
+import { Meta } from "@storybook/addon-docs/blocks";
+
+import { Snippet } from "../../snippet";
+
+<Meta title="Foundations/Communication Patterns" />
+
+# Communication Patterns
+
+A KOS model talks to the backend in a small number of ways, and each way is a
+decorator on the model. Everything else in this codex is detail on one of
+them. This page names them, shows the shape of each, and says which page goes
+further. The KOS documentation article "Device Communication Patterns" covers
+the same ground from the device's side.
+
+| Pattern | What it carries | Decorator | Direction | Pages |
+| ------- | --------------- | --------- | --------- | ----- |
+| Service requests | baseline data on load; writes and reads the model asks for | `@kosServiceRequest`, through the generated `serviceRequest` | model asks, backend answers | Services, Service Mapping, Service Caching, Service Errors |
+| Topics | events the backend publishes as things happen | `@kosTopicHandler` | backend announces, model listens | Topic Handlers and the other Topics pages |
+| Configuration properties | adjustable values held by the backend, with schema, units and options | `@kosConfigProperty`, `@kosConfigBean` | both: read with metadata, written back | Config Properties, Config Conversion |
+| Futures | long-running operations with progress and cancellation | `@kosFutureAware`, `@kosFuture` | model starts, backend reports progress | Futures, Multi Futures |
+| Troubles | markers the backend raises against parts of the system: a fault, or something that has happened and needs attention | `@kosTroubleAware` | backend raises; backend or user clears | Troubles |
+| State beans | read-only physical conditions the backend observes | `@kosStateBean`, `@kosStateProp` | backend reports | not in this codex: the codex backend has no state service |
+
+## Service requests
+
+A request is bound to a model method. The path and HTTP method come from a
+catalog generated from the backend's API types. A lifecycle request runs in a
+phase and hands the method the response; a method-driven request runs when
+called and closes its loop from its own response.
+
+<Snippet name={["endpoint-catalog@document-services.ts", "service-method@document-model.ts"]} />
+
+## Topics
+
+A topic handler listens for broker messages, or events, on a subscribed topic
+and applies each one to the model. The backend publishes when something
+happens; the model does not ask.
+
+<Snippet name="topic-websocket@widget-model.ts" />
+
+## Configuration properties
+
+A configuration property binds a model field to a value the backend holds,
+addressed by bean path and attribute. The binding reads the value with its
+schema, converts units through the region, and writes changes back.
+
+<Snippet name="config-property@widget-model.ts" />
+
+## Futures
+
+A future is an operation the backend runs over time. The model starts it and
+receives status, progress and completion through the future handler the
+decorator injects.
+
+<Snippet name={["task-future-aware@task-model.ts", "task-future@task-model.ts"]} />
+
+## Troubles
+
+A trouble is a marker the backend raises against a path in the system. It can
+be a fault, and it can equally be a note that something has happened: a
+cleaning reminder raised every morning, shown when the user opens the admin
+UI, cleared by the user and raised again the next day. Nothing need be broken
+or service affecting. A trouble-aware model exposes the troubles that name its
+path.
+
+<Snippet name="session-trouble-aware@session-model.ts" />
+
+## Which one
+
+Baseline data and anything the model asks for: a service request. Changes the
+backend announces: a topic. Values an operator adjusts: a configuration
+property. Operations that take time: a future. Something the backend wants noticed, whether a fault or a reminder: a
+trouble. A model usually combines two or three; the widget on the Topics
+pages loads nothing and listens, the document on the Services pages loads and
+writes, the journal on the Lifecycle Race Conditions page loads and listens.

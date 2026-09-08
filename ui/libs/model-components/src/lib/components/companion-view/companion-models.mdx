@@ -1,0 +1,82 @@
+import { Canvas, Meta } from "@storybook/addon-docs/blocks";
+
+import { Snippet } from "../../snippet";
+import * as Stories from "./companion-view.stories";
+
+<Meta title="Relationships/Companion Models" />
+
+# Companion Models
+
+A companion is a separate model created alongside another: when a
+`session` is created, its `timer` is created with it, and destroyed with it.
+Neither owns the other. A companion attaches behaviour to a model you do
+not own. Creating the parent creates the companion; the parent's code does
+not reference it.
+
+## How it was built
+
+| Step | Command |
+| ---- | ------- |
+| Scaffold the companion | kos-codegen `add_companion`: name `timer`, parent `session`, pattern composition |
+| Bind it in the app | the registration chain gains `.companion(Session.type, Timer.type)` |
+| Register, hook, component | `register_model timer`, `kosui model:hook --modelName session`, `kosui component --name companion-view` |
+
+## The decorator
+
+`@kosCompanion` sits under `@kosModel`. The timer sets one option, `mode`.
+The default, `decorator`, proxies the parent's members onto the companion so
+the companion stands in for the parent. The timer keeps its own surface (two
+futures and a reading of the parent) and sets `composition`, which injects
+the parent reference and nothing else. The other defaults hold: the parent is
+injected as `companionParent`, and the companion is created with the parent,
+at `INIT`.
+
+<Snippet name="timer-companion@timer-model.ts" />
+
+## The parent
+
+`getCompanionParent()` returns the parent in either mode, and the parent is
+also injected as a property. `parentProperty` renames that property; the
+timer calls it `session`.
+
+<Snippet name="timer-companion-parent-property@timer-model.ts" />
+
+The field is declared without an assignment: the framework injects the parent
+when it creates the companion. `declare` tells TypeScript the field exists
+without emitting an initializer that would overwrite it.
+
+<Snippet name="timer-parent-field@timer-model.ts" />
+
+Anything on the companion can then read through it.
+
+<Snippet name="timer-parent-read@timer-model.ts" />
+
+## Options this companion does not set
+
+`excludeProperties` applies in decorator mode only: it lists parent members
+that are not proxied onto the companion. `lifecycle` names the parent phase
+at which the companion is created, `INIT` by default; `LOAD` or `READY` defer
+it until the parent has loaded or is ready. The timer needs neither, so
+neither appears in its code.
+
+## Binding parent to companion
+
+The decorator declares the timer as a companion; the registration chain names
+the parent type it attaches to. A companion is registered against its parent's
+type, and from then on every session is created with a timer.
+
+<Snippet name="registration-companion@registration.ts" />
+
+## Reaching a companion
+
+`getKosCompanionModel(parent, Companion.type)` returns the companion
+instance for a parent, by the companion's type id.
+
+<Snippet name="companion-view@companion-view.tsx" />
+
+<Snippet name="companion-view-story@companion-view.stories.tsx" />
+
+<Canvas of={Stories.CompanionStory} sourceState="none" />
+
+The timer's id is derived from the session's, and `timer.sessionUser` is the
+parent's `user` read through the injected property.

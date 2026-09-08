@@ -1,0 +1,82 @@
+import { Canvas, Meta } from "@storybook/addon-docs/blocks";
+
+import { Snippet } from "../../snippet";
+import * as Stories from "./state-machine-view.stories";
+
+<Meta title="Lifecycle/State Machine" />
+
+# State Machine
+
+A model whose lifecycle has named phases declares them as a machine.
+`@kosStateMachine` takes the `initial` state, a `states` map of the events
+each state accepts and where they lead, and `initializeAt`, the model
+lifecycle phase at which the machine starts. Until then `currentState` is
+undefined and `isFsmInitialized` is false.
+
+`transition(event)` moves the machine; an event the current state does not
+list is invalid. `throwOnInvalid` belongs to the machine's options, the
+second decorator argument, and a guard can override it per method.
+
+## How it was built
+
+| Step | Command |
+| ---- | ------- |
+| Scaffold | `kosui model --name session --project core-concept-models` |
+| The machine, guards and handlers | written on the model; there is no mutator for them |
+| Register, hook, component | `register_model`, `kosui model:hook --modelName session`, `kosui component --name state-machine-view` |
+
+## States and events
+
+The machine is typed over two string unions: the states it can be in and the
+events that move it. Everything below refers back to these names.
+
+<Snippet name="session-states@session-model.ts" />
+
+## The machine
+
+`@kosStateMachine<SessionState, SessionEvent>` sits under `@kosModel`. Its
+first argument is the configuration: `initial` names the starting state,
+`initializeAt` the lifecycle phase at which the machine starts, and `states`
+maps each state to the events it accepts and where each leads. `closed` lists
+nothing, so it is terminal. The second argument is the machine's options;
+`throwOnInvalid: false` makes a rejected event a logged no-op rather than an
+exception.
+
+<Snippet name="session-state-machine@session-model.ts" />
+
+## Transitions
+
+The decorator injects `transition(event)`. The model wraps each event in a
+named method so callers never handle event strings.
+
+<Snippet name="session-transitions@session-model.ts" />
+
+## Guards
+
+`@kosStateGuard` refuses a method call outside its `allowedStates`. With
+`throwOnInvalid: false` the call is logged and skipped instead of throwing.
+
+<Snippet name="session-guard@session-model.ts" />
+
+## Entry and exit
+
+`@kosStateEntry(state)` and `@kosStateExit(state)` run on the way in and out.
+An async entry handler can drive the next transition through the state's
+`onDone` and `onError` events.
+
+<Snippet name="session-entry-exit@session-model.ts" />
+
+## The view
+
+The view reads the two injected properties, `currentState` and
+`isFsmInitialized`, next to the journal the handlers write.
+
+<Snippet name="state-machine-view@state-machine-view.tsx" />
+
+<Snippet name="state-machine-view-story@state-machine-view.stories.tsx" />
+
+<Canvas of={Stories.StateMachineStory} sourceState="none" />
+
+**record** does nothing while idle or locked and appends while active. The
+journal shows the entry and exit handlers firing around each transition, and
+`closed` accepts nothing.

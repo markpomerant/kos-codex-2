@@ -1,0 +1,72 @@
+import { Canvas, Meta } from "@storybook/addon-docs/blocks";
+
+import { Snippet } from "../../snippet";
+import * as Stories from "./service-errors-view.stories";
+
+<Meta title="Services/Service Errors" />
+
+# Service Errors
+
+Failure policy is declared once, on the request.
+`errorHandler.strategy` decides what happens: `throw` fails the phase (the
+default), `log` and `ignore` swallow the error and hand the method
+`defaultValue` instead. `onError(error, model)` always runs first; for an HTTP
+failure the error carries `status`, `statusText` and the response body.
+
+## How it was built
+
+| Step | Command |
+| ---- | ------- |
+| The request | kos-codegen `add_service_request`: `loadNote`, `GET /api/codex/objects/{id}`, "method" mode |
+
+`GET /api/codex/objects/{id}` returns one object. For an id the backend does
+not hold it answers success with no payload, which is not an error. The client
+passes the bare response envelope to the method in that case, so the method checks for the field it needs rather than for an object. A
+malformed id produces a failure response, which the policy below handles.
+
+## The request
+
+A method-driven request: no `lifecycle`, so it runs when `loadNote` is
+called, with the id first and the execution context last. As declared it has
+only the generated `transform`; the failure policy is the option added next.
+
+<Snippet name="service-error-request@document-model.ts" />
+
+## The errorHandler option
+
+`strategy: 'log'` means a failed call is logged and the method still runs,
+receiving `defaultValue` (`null`) in place of data. `onError` runs before
+that and is where the model records the failure: the HTTP status when there
+is one, the error message otherwise.
+
+The `serviceRequest` helper in this repository supplies
+`{ strategy: 'log', defaultValue: null }` to any request that declares no
+`errorHandler`, so the requests on the other service pages already log and
+continue. A request that declares its own `errorHandler` replaces that whole
+object, which is why the strategy and default are written again here beside
+`onError`.
+
+<Snippet name="service-error-handler@document-model.ts" />
+
+## The method
+
+The body clears the last result, performs the call with the id as a path
+parameter, and returns when there is no data. The failure is handled before
+the body sees it: `onError` sets `lastError`, then `executeServiceRequest`
+hands back `null`.
+
+<Snippet name="service-error-method@document-model.ts" />
+
+## The view
+
+<Snippet name="service-errors-view@service-errors-view.tsx" />
+
+<Snippet name="service-errors-view-story@service-errors-view.stories.tsx" />
+
+<Canvas of={Stories.ServiceErrorsStory} sourceState="none" />
+
+**load note 1** loads a note that exists (add one on the services page first).
+**load note 999** asks for an id the backend does not hold: success, no
+payload, and the readout says so. **load note abc** sends an id the backend cannot
+parse; it answers with a failure, `onError` records the status, the method sees
+no data and returns.

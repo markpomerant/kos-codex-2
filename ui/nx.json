@@ -1,0 +1,86 @@
+{
+  "$schema": "./node_modules/nx/schemas/nx-schema.json",
+  "namedInputs": {
+    "default": [
+      "{projectRoot}/**/*",
+      "sharedGlobals",
+      "!{projectRoot}/target/**/*"
+    ],
+    "production": [
+      "default",
+      "!{projectRoot}/**/?(*.)+(spec|test).[jt]s?(x)?(.snap)",
+      "!{projectRoot}/tsconfig.spec.json",
+      "!{projectRoot}/src/test-setup.[jt]s",
+      "!{projectRoot}/.eslintrc.json",
+      "!{projectRoot}/eslint.config.mjs"
+    ],
+    "sharedGlobals": []
+  },
+  "defaultBase": "main",
+  "useInferencePlugins": false,
+  "pluginsConfig": {
+    "@nx/js": {
+      "analyzeSourceFiles": true
+    }
+  },
+  "cli": {
+    "packageManager": "npm"
+  },
+  "tui": {
+    "enabled": false
+  },
+  "targetDefaults": {
+    "@nx/webpack:webpack": {
+      "inputs": [
+        {
+          "env": "NX_MF_DEV_SERVER_STATIC_REMOTES"
+        },
+        {
+          "env": "NX_MF_DEV_REMOTES"
+        }
+      ],
+      "dependsOn": ["^build"],
+      "cache": true
+    },
+    "@nx/vite:test": {
+      "cache": true,
+      "inputs": ["default", "^production"]
+    },
+    "@nx/vite:build": {
+      "cache": true,
+      "dependsOn": ["^build"],
+      "inputs": ["production", "^production"]
+    },
+    "@nx/eslint:lint": {
+      "cache": true,
+      "inputs": [
+        "default",
+        "{workspaceRoot}/.eslintrc.json",
+        "{workspaceRoot}/.eslintignore",
+        "{workspaceRoot}/eslint.config.mjs"
+      ]
+    },
+    "build": {
+      "cache": true,
+      "dependsOn": ["^build"]
+    }
+  },
+  "generators": {
+    "@nx/react": {
+      "library": {
+        "style": "@emotion/styled",
+        "linter": "eslint",
+        "unitTestRunner": "none"
+      },
+      "application": {
+        "babel": true,
+        "style": "@emotion/styled",
+        "linter": "eslint",
+        "bundler": "webpack"
+      },
+      "component": {
+        "style": "@emotion/styled"
+      }
+    }
+  }
+}

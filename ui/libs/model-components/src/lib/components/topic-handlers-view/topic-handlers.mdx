@@ -1,0 +1,93 @@
+import { Canvas, Meta } from "@storybook/addon-docs/blocks";
+
+import { Snippet } from "../../snippet";
+import * as Stories from "./topic-handlers-view.stories";
+
+<Meta title="Topics/Topic Handlers" />
+
+# Topic Handlers
+
+A device pushes state as **events on topics**. `@kosTopicHandler` subscribes
+a model method to a topic; when a event arrives the framework parses the body
+and calls the method with it. The model owns the resulting state, and any
+component reading that state re-renders.
+
+`widget` is the host for every topic exemplar in this section. Its state is
+a set of plain fields, one per handler, so each page can show what its
+handler did.
+
+## How it was built
+
+| Step | Command |
+| ---- | ------- |
+| Scaffold the model | `kosui model --name widget --project core-concept-models` |
+| Add the state fields | kos-codegen `add_property`: `temperature: number`, `pings: number`, `rawEvent: string` |
+| Add the handlers | kos-codegen `add_topic_handler` once per handler: a name, a topic and the payload type |
+| Register, hook, component | `register_model`, `kosui model:hook --modelName widget`, `kosui component --name topic-handlers-view` |
+
+Each handler starts as the decorator and a method whose body you fill in;
+the event types live in the model's `types/index.d.ts`. The snippets below
+pair each handler with the field it writes, so you see both steps together.
+
+## websocket: true (events from the transport)
+
+`websocket: true` binds the handler to the device. The subscription manager
+registers the topic with the WebSocket transport, and each event's body is
+JSON-parsed before the method runs. `topic` and `websocket` are the whole
+declaration for a device handler; `websocket` defaults to `false`, so it has to
+be written, and every other option on the decorator has a default.
+
+<Snippet name="topic-websocket@widget-model.ts" />
+
+## websocket: false (events from the in-app bus)
+
+With `websocket: false` the same decorator subscribes to the in-app
+`EventBus` instead. The subscription stays inside the app; the handler fires
+when something in the app calls `EventBus.publish(topic, body)`. The story's
+"local event" button makes that call.
+
+<Snippet name="topic-local@widget-model.ts" />
+
+## lifecycle (when the subscription is registered)
+
+Most handlers set no `lifecycle`. By default the subscription is registered as
+soon as the model is wired, without waiting for any phase, and every other
+handler on these pages uses that default. Set `lifecycle` when registration
+must be tied to a phase. `READY` waits for the model to be ready; the raw-event
+handler in the next section carries it, and the fragment below sits inside that
+handler's `@kosTopicHandler({ ... })`. `ACTIVATE` subscriptions are disposed
+again on deactivate. `INIT` registers before the model's own load; the
+Lifecycle Race Conditions page uses it so a delta can be held until its
+baseline arrives.
+
+<Snippet name="topic-lifecycle@widget-model.ts" />
+
+## skipParse (internal: the body as the device sent it)
+
+`skipParse: true` hands the method the raw body string instead of the parsed
+object. The option is marked `@internal` in the SDK source; it is shown here
+because it is the only way to see what a event looks like on the wire. It is
+not an option an application handler reaches for.
+
+<Snippet name="topic-skip-parse@widget-model.ts" />
+
+## The view
+
+<Snippet name="topic-handlers-view@topic-handlers-view.tsx" />
+
+<Snippet name="topic-handlers-story@topic-handlers-view.stories.tsx" />
+
+<Canvas of={Stories.TopicHandlersStory} sourceState="none" />
+
+The "device" strip is story apparatus. Its buttons call the `device` model,
+whose service requests ask the codex backend to publish the event, so it
+arrives over the websocket like any device event. `publishLocal` publishes on
+the in-app EventBus and never reaches the socket.
+Press each button and watch the matching field change.
+
+## One handler per topic
+
+The decorator stores handlers in a map keyed by topic. Two methods on one
+class decorated with the same topic do not both run; the later one replaces
+the earlier. Give each handler its own topic, or subscribe one method to an
+array of topics.

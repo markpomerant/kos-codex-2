@@ -1,0 +1,138 @@
+import { Canvas, Meta } from "@storybook/addon-docs/blocks";
+
+import { Snippet } from "../../snippet";
+import * as Stories from "./futures-view.stories";
+import * as ProjectStories from "../project-sync-view/project-sync-view.stories";
+
+<Meta title="Async/Futures" />
+
+# Futures
+
+A long-running device operation is a **future**: the backend answers the
+request at once with a tracker and keeps pushing progress until an end
+state. `@kosFutureAware` gives a model the slot and the derived state
+(`future`, `progress`, `status`, `isRunning`, `isCancelled`, `cancelFuture`);
+`@kosFuture` turns an async method into the operation the slot tracks.
+
+`task` runs the codex backend's "additional data" operation, which reports progress
+over the socket until it succeeds.
+
+## How it was built
+
+| Step | Command |
+| ---- | ------- |
+| Scaffold with future support | `kosui model --name task --project core-concept-models --future-aware complete` |
+| The operation | kos-codegen `add_service_request`: `startAdditionalData`, `POST /api/codex/objects/additional-data/{numOfItems}`, "method" mode |
+| Register, hook, component | `register_model`, `kosui model:hook --modelName task`, `kosui component --name futures-view` |
+
+## Future support
+
+`@kosFutureAware()` gives the class one future slot. With no options it
+injects the state properties (`future`, `progress`, `status`, `isRunning`,
+`isCancelled`), `cancelFuture`, and the handler behind them as
+`futureHandler`. That is `mode: "full"`. `mode: "minimal"` injects only the
+handler, for a model whose callers await the operation and read no progress;
+no model in the codex sets it, because every view here reads the derived
+state. `handlerProperty` renames the handler; the last section of this page
+shows it.
+
+<Snippet name="task-future-aware@task-model.ts" />
+
+## The operation
+
+`@kosFuture` marks the method whose call becomes the tracked future. Before
+the method runs it opens a future and, with `trackerPolicy: "context"`,
+puts the tracker on the execution context so the request can carry it.
+`alias` names the future, `namespace` groups it, and `abortController:
+true` wires cancellation both ways: `cancelFuture` aborts the request, and
+an aborted request cancels the future.
+
+<Snippet name="task-future@task-model.ts" />
+
+## The request underneath
+
+The decorated method is an ordinary service request: `@serviceRequest`
+names the endpoint and the response transform. `abortController: true`
+changes the signature. The framework passes the `AbortSignal` before the
+execution context, so `$ctx` moves from the second parameter to the third.
+
+<Snippet name="task-future-signature@task-model.ts" />
+
+## Carrying the tracker
+
+The body forwards the tracker from the execution context in the request
+options. Forwarding the tracker binds the codex backend's progress events to this
+future instead of to a new one.
+
+<Snippet name="task-future-body@task-model.ts" />
+
+## Reacting to progress
+
+`onFutureUpdate` is called on every change of progress or end state.
+
+<Snippet name="task-future-update@task-model.ts" />
+
+## The view
+
+<Snippet name="futures-view@futures-view.tsx" />
+
+## The story
+
+<Snippet name="futures-view-story@futures-view.stories.tsx" />
+
+<Canvas of={Stories.FuturesStory} sourceState="none" />
+
+Press **start**: the status goes `IN_PROGRESS`, progress increases as the codex backend
+reports it, and the task is `done` on `SUCCESS`.
+
+## Adding a future to an existing model
+
+`task` was scaffolded with future support. An existing model gains the same
+capability in place. The example is `project`, which already owns tasks and
+depends on a team.
+
+| Step | Command |
+| ---- | ------- |
+| Add future support | kos-codegen `add_future_to_model`: model `project`, level `complete` |
+| Add the operation | kos-codegen `add_service_request` on `project`: `startSync`, `POST /api/codex/objects/additional-data/{numOfItems}`, "method" mode |
+| Add the derived field | kos-codegen `add_property`: `lastSync: string` |
+| Generate the component | `kosui component --name project-sync-view` |
+
+### Future support, with the handler renamed (a migration option)
+
+The class gains `@kosFutureAware`, the future state on its interface, and the
+external future interface on its public type. Here the decorator sets
+`handlerProperty`. The option renames the injected handler; it exists for a
+class that already has a member named `futureHandler`, such as a model
+migrated from hand-written future tracking. A new model leaves it out and
+gets `futureHandler`. The project has no such member; the option is set here
+so the page shows it once.
+
+<Snippet name="project-future-aware@project-model.ts" />
+
+With the handler renamed, the merged interface takes the state from
+`ExternalFutureInterface` and declares the handler under the new name.
+
+<Snippet name="project-future-handler@project-model.ts" />
+
+### The operation
+
+The same codex backend operation the task runs, now tracked on the project.
+Without `abortController` the execution context is the second parameter.
+
+<Snippet name="project-future@project-model.ts" />
+
+### Reacting to completion
+
+A derived field records when the last sync ended; `onFutureUpdate` writes it
+on the end state.
+
+<Snippet name="project-future-update@project-model.ts" />
+
+### The view
+
+<Snippet name="project-sync-view@project-sync-view.tsx" />
+
+<Snippet name="project-sync-story@project-sync-view.stories.tsx" />
+
+<Canvas of={ProjectStories.ProjectSyncStory} sourceState="none" />

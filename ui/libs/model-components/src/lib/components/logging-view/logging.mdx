@@ -1,0 +1,79 @@
+import { Canvas, Meta } from "@storybook/addon-docs/blocks";
+
+import { Snippet } from "../../snippet";
+import * as Stories from "./logging-view.stories";
+
+<Meta title="Diagnostics/Logging" />
+
+# Logging
+
+Every scaffolded model carries `@kosLoggerAware()`, which injects one shared
+logger per model type as `this.logger`. Its two options change the name and
+the context: `loggerProperty` renames the injected field, `loggerContext`
+names the logging context instead of the model type. `@kosLogger({ group })`
+files the model's lines under a group.
+
+Renaming the logger has one constraint. The SDK's `executeServiceRequest` helper
+reads a `logger` property on the model, so a model with service requests
+keeps the default name. `session` has no service requests, so it renames.
+
+## How it was built
+
+| Step | Command |
+| ---- | ------- |
+| The default | `@kosLoggerAware()` comes from the scaffold; `counter` shows it |
+| The options | `loggerProperty`, `loggerContext` and `@kosLogger` are written on `session` |
+| The component | `kosui component --name logging-view` |
+
+## The logger
+
+`@kosLoggerAware()` with no options injects the logger as `this.logger`,
+under a context named after the model type. Every scaffolded model carries
+this form; the counter is the example.
+
+<Snippet name="counter-logger@counter-model.ts" />
+
+Any method reaches it as `this.logger`.
+
+<Snippet name="counter-lifecycle@counter-model.ts" />
+
+## Renaming the logger and its context
+
+`session` sets both options. `loggerProperty: 'log'` is the field the logger
+is injected under; `loggerContext: 'codex.session'` is the name every line is
+filed under, in place of the model type id.
+
+<Snippet name="session-logger-aware@session-model.ts" />
+
+## The group
+
+`@kosLogger` sits beside it and names the group. A group collects the output
+of several contexts, so `codex` can be switched on or off as one unit.
+
+<Snippet name="session-logger-group@session-model.ts" />
+
+## The field
+
+With `loggerProperty` renamed, the merged interface declares the field under
+the new name instead of extending `KosLoggerAware`. The decorator injects the
+logger on construction, so the class has no assignment for the field.
+
+<Snippet name="session-logger-field@session-model.ts" />
+
+## Using it
+
+Any method reaches the logger through the renamed field. `note` counts the
+lines it has written so the view has a value to display.
+
+<Snippet name="session-log-use@session-model.ts" />
+
+## The view
+
+<Snippet name="logging-view@logging-view.tsx" />
+
+<Snippet name="logging-view-story@logging-view.stories.tsx" />
+
+<Canvas of={Stories.LoggingStory} sourceState="none" />
+
+Open the browser console and press **log a line**: the line is filed under
+the `codex.session` context.

@@ -1,0 +1,111 @@
+import { Canvas, Meta } from "@storybook/addon-docs/blocks";
+
+import { Snippet } from "../../snippet";
+import * as Stories from "./model-dependencies-view.stories";
+
+<Meta title="Relationships/Model Dependencies" />
+
+# Model Dependencies
+
+`@kosDependency` injects a reference to a model this one does not own. The
+framework resolves it by `modelType` and `id`; if no such model exists it
+creates one. The remaining options adjust that: `options` are what a created
+model is built from, `lifecycle` names the phase of this model at which the
+dependency is resolved (INIT by default), and `resolutionPolicy` says what a
+failed lookup means: `CREATE` builds one (the default), `CONTINUE` leaves the
+property undefined, `FAIL` throws.
+
+A dependency is how models compose. Each model is responsible for one thing:
+the team owns its members, the counter owns its count, a widget owns the
+temperature it reads from the device. A model that needs any of that declares
+a dependency on the owner and reads it. It does not subscribe to the owner's
+topics, call the owner's endpoints or copy the owner's data; the owner does
+that work once, and every dependent follows it through computed properties
+(the Computed Properties page).
+
+## How it was built
+
+| Step | Command |
+| ---- | ------- |
+| Scaffold | `kosui model --name project --project core-concept-models` |
+| The widget | kos-codegen `add_dependency`: property `widget`, type `WidgetModel`, ref `Widget.type`, id `widget-computed` |
+| The team | kos-codegen `add_dependency`: property `team`, type `TeamModel`, ref `Team.type`, id `project-team`; `options` added to the decorator, the id later replaced by a PropKey |
+| The counter | kos-codegen `add_dependency`: property `counter`, type `CounterModel`, ref `Counter.type`, id `project-counter`; `resolutionPolicy: CONTINUE` and `lifecycle: READY` added |
+| Register, hook, component | `register_model`, `kosui model:hook --modelName project`, `kosui component --name model-dependencies-view` |
+
+## The minimal form
+
+A dependency needs the type of the model it points at. `id` names the
+instance and defaults to the type id, which is the id a singleton model has,
+so a dependency on a singleton is `modelType` alone. The widget is not a
+singleton, so this dependency names the widget it wants. Everything else is
+the default: the widget is created if no model with that id exists, and it is
+resolved, and awaited ready, before the project's `init()` runs.
+
+<Snippet name="project-widget-dependency@project-model.ts" />
+
+The property is declared with `!` and no initializer: the framework assigns it
+before any lifecycle hook runs.
+
+## Created with options
+
+The project depends on a team. `options` are what the team is built from if no
+model with that id exists yet. Creating on a failed lookup is the default
+policy, `CREATE`, so it is not passed.
+
+<Snippet name="project-dependency@project-model.ts" />
+
+The `id` here is a PropKey: the framework reads the project's `teamKey`
+property when it resolves the dependency. The Prop Keys page covers that
+substitution.
+
+## optionsRequired
+
+A model can refuse to be created as a dependency with no options:
+`@kosModel({ optionsRequired: true })`. `@kosParentAware` sets it
+automatically, so a `user` cannot be resolved as a bare dependency.
+`team` does not set it, so the project's dependency above creates one from
+its `options`.
+
+## A dependency that may be absent
+
+The counter is optional. With `resolutionPolicy: CONTINUE`, a lookup that
+finds nothing leaves the property `undefined` and the project still boots, so
+the field is typed optional and every read guards it. The `lifecycle` option
+on the same decorator is the next section.
+
+<Snippet name="project-dependency-optional@project-model.ts" />
+
+## Resolving at a later phase
+
+`lifecycle` names the phase of this model at which the dependency is resolved.
+Before the project runs its hook for that phase, the framework looks the
+dependency up (or creates it, by the policy) and waits until it is ready. The
+default is `INIT`: the dependency is ready before `init()`. The other phases
+are `LOAD`, `READY`, `ACTIVATE` and `ONLINE`. Nothing in the project's
+`init()` or `load()` reads the counter; only computed properties do, and views
+read those once the project is ready. So the counter is resolved at `READY`.
+
+<Snippet name="project-dependency-lifecycle@project-model.ts" />
+
+## Reading through a dependency
+
+Cross-model reads are computed properties over the dependency. The project
+derives what it needs from the injected models and recomputes when they
+change; the team and the counter remain responsible for their own state. The
+team reads follow the required dependency; `counterState` shows what the
+optional one resolved to.
+
+<Snippet name="project-dependency-reads@project-model.ts" />
+
+## The view
+
+<Snippet name="model-dependencies-view@model-dependencies-view.tsx" />
+
+<Canvas of={Stories.ModelDependenciesStory} sourceState="none" />
+
+The team was created from the dependency's options before the project
+initialised. The counter row shows a limitation of the SDK: the `CONTINUE`
+policy is applied when a dependency is resolved during a lifecycle phase, but
+the injection performed at construction creates the model regardless, so a
+counter exists here even though none did before.

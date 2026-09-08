@@ -1,0 +1,89 @@
+import { Canvas, Meta } from "@storybook/addon-docs/blocks";
+
+import { Snippet } from "../../snippet";
+import * as Stories from "./service-mapping-view.stories";
+
+<Meta title="Services/Service Mapping" />
+
+# Service Mapping
+
+A list response arrives as rows; the model holds child models. Four options
+on the request turn rows into models without hand-written loops: `transform`,
+`iterateOver`, `mappings` and `modelFactory` (with `idExtractor`).
+
+## How it was built
+
+| Step | Command |
+| ---- | ------- |
+| The LOAD request | kos-codegen `add_service_request`: `onNotesLoaded`, `GET /api/codex/objects`, lifecycle LOAD |
+| The reload | kos-codegen `add_service_request`: `reloadNotes`, same path, "method" mode |
+| The child model | `kosui model --name note --project core-concept-models`, then `add_property desc` |
+
+## The mapper is the boundary
+
+The codex backend answers with a bare array of `{ id, desc }`. `iterateOver` needs a
+path into an object, so the generated identity mapper is narrowed to wrap the
+array. The mapper is the only place the wire shape is adapted; the LOAD
+request and the reload share it.
+
+<Snippet name="notes-mapper@document-services.ts" />
+
+## From rows to models
+
+The request starts as any lifecycle request does: the endpoint and the phase.
+Everything that follows is an option added to this decorator, and the options
+run in the order they are introduced here.
+
+<Snippet name="service-mapping@document-model.ts" />
+
+`transform` runs first, on the whole response. It is the mapper above, so
+from here on the payload is `{ notes: [...] }`.
+
+<Snippet name="service-transform@document-model.ts" />
+
+`iterateOver` names the array inside the transformed payload. The remaining
+options apply to each item in it, not to the payload as a whole.
+
+<Snippet name="service-iterate-over@document-model.ts" />
+
+`mappings` reshape a row into the options a `NoteModel` is built from. Each
+entry copies `from` one key `to` another; a built-in `transform` such as
+`string` converts the value, `required` fails the row when the key is
+missing, and `default` fills it in instead.
+
+<Snippet name="service-mappings@document-model.ts" />
+
+`idExtractor` names the model id in the mapped row, and `modelFactory` is the
+registration that builds one model from it. The cast is there because the
+option is typed for a generic registration bean.
+
+<Snippet name="service-model-factory@document-model.ts" />
+
+The method receives one `NoteModel` per array item, already built. It puts
+them in the container.
+
+<Snippet name="service-mapping-handler@document-model.ts" />
+
+## Reload: reconcile, never reassign
+
+A lifecycle handler cannot be re-invoked, so a reload is a second,
+method-driven request on the same path. `executeServiceRequest` performs it
+and hands back the transformed payload, or `undefined` on failure.
+
+<Snippet name="service-reload@document-model.ts" />
+
+Its rows are mapped at the boundary (wire ids are integers, model ids are
+strings) and reconciled into the container with `resolveContainerDeltas`:
+models that are gone are removed, matches are updated in place, new rows are
+added. Model identity is preserved: a view bound to an existing note keeps the
+same model instance.
+
+<Snippet name="service-reload-reconcile@document-model.ts" />
+
+## The view
+
+<Snippet name="service-mapping-view@service-mapping-view.tsx" />
+
+<Snippet name="service-mapping-view-story@service-mapping-view.stories.tsx" />
+
+<Canvas of={Stories.ServiceMappingStory} sourceState="none" />

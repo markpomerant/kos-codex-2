@@ -1,0 +1,13 @@
+{
+  "extraKnownMarketplaces": {
+    "kos": {
+      "source": {
+        "source": "directory",
+        "path": "/Users/markpomerant/Code/kos-codex-2/.kos/agent-plugins"
+      }
+    }
+  },
+  "enabledPlugins": {
+    "kos-tools@kos": true
+  }
+}

@@ -1,0 +1,49 @@
+{
+  "compileOnSave": false,
+  "compilerOptions": {
+    "rootDir": ".",
+    "sourceMap": true,
+    "declaration": true,
+    "moduleResolution": "bundler",
+    "emitDecoratorMetadata": false,
+    "experimentalDecorators": true,
+    "importHelpers": true,
+    "target": "esnext",
+    "module": "esnext",
+    "lib": ["esnext", "dom"],
+    "skipLibCheck": true,
+    "skipDefaultLibCheck": true,
+    "baseUrl": ".",
+    "paths": {
+      "@kos-codex-2/kos-codex-2-models": [
+        "libs/kos-codex-2-models/src/index.ts"
+      ],
+      "@kos-codex-2/model-components": ["libs/model-components/src/index.ts"],
+      "@kos-codex-2/core-concept-models": [
+        "libs/core-concept-models/src/index.ts"
+      ],
+      "@kos-codex-2/dispense-concept-models": [
+        "libs/dispense-concept-models/src/index.ts"
+      ]
+    },
+    "declarationMap": true,
+    "jsx": "react-jsx",
+    "jsxImportSource": "@emotion/react",
+    "allowSyntheticDefaultImports": true,
+    "isolatedModules": true,
+    "strict": true,
+    "noImplicitAny": false,
+    "strictNullChecks": true,
+    "strictFunctionTypes": true,
+    "strictBindCallApply": true,
+    "strictPropertyInitialization": true,
+    "noImplicitThis": true,
+    "alwaysStrict": true,
+    "noUnusedLocals": false,
+    "noUnusedParameters": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "noPropertyAccessFromIndexSignature": false
+  },
+  "exclude": ["node_modules", "tmp"]
+}

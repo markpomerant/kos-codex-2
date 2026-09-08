@@ -1,0 +1,21 @@
+{
+  "name": "kos-codex-2-ui",
+  "type": "kos.ui",
+  "version": "0.0.0-SNAPSHOT",
+  "generator": {
+    "projectType": "ui",
+    "defaults": {
+      "component": {
+        "folder": "app"
+      }
+    }
+  },
+  "studio": {
+    "perspectives": [
+      "ui"
+    ]
+  },
+  "registration": {
+    "file": "src/app/registration.ts"
+  }
+}

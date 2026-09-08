@@ -1,0 +1,94 @@
+import { Meta } from "@storybook/addon-docs/blocks";
+
+<Meta title="Foundations/Advanced Options" />
+
+# Advanced Options
+
+Every decorator in this codex works with its defaults for the common case,
+and every page opens with that form. The options on this page are the rest:
+controls for migration, for a shape the defaults cannot express, or for a
+situation the defaults get wrong. None of them is a starting point. Reach for
+one when the use case named beside it is yours, and not before. Each row says
+which page shows the option in code.
+
+## Containers
+
+| Option | Use it when | Page |
+| ------ | ----------- | ---- |
+| `containerOptions.indexMap`, `sortKey` | models are looked up by a property or need a fixed order; the most common additions | Container Indexes |
+| `containerOptions.maxCapacity`, `evictionStrategy`, `evictionBatchSize`, `customEvictionFilter` | the collection is unbounded and old models must be dropped | Container Capacity |
+| `containerProperty` | existing code already reads the container under another name | Container Models, last section |
+| `modelsProperty` | existing code already reads the models list under another name | Container Models, last section |
+| `containerOptions.extensionId` | an index extension registered under that id must contribute indexes | Container Models, last section |
+| `includeMethods: false`, `includeGetters: false` | the class already defines members under the injected names | not shown; deferred |
+| `containerOptions.parentId`, `legacy` | the parent is not the owning model, or the pre-decorator `_models` layout must be kept | not shown; deferred |
+
+## Parents and children
+
+| Option | Use it when | Page |
+| ------ | ----------- | ---- |
+| `@kosParentAware({ parentId })` | an existing options shape carries the parent id under a name other than `kosParentId` | Parent And Child, last section |
+
+## Dependencies
+
+| Option | Use it when | Page |
+| ------ | ----------- | ---- |
+| `id` | the dependency is a specific instance, not the type's single model | Model Dependencies |
+| `options` | the dependency must be created with options when it does not exist yet | Model Dependencies |
+| `resolutionPolicy: CONTINUE` | the model must boot without the dependency | Model Dependencies |
+| `lifecycle` | the dependency is only needed from a later phase | Model Dependencies, last section |
+
+## Companions
+
+| Option | Use it when | Page |
+| ------ | ----------- | ---- |
+| `mode: 'composition'` | the companion must not proxy the parent's members (the default `decorator` mode does) | Companion Models |
+| `parentProperty` | the companion wants the parent under a name other than `companionParent` | Companion Models |
+| `lifecycle`, `excludeProperties` | the companion must be created at a specific phase, or specific parent members must not be proxied in decorator mode | Companion Models, "Options this companion does not set" |
+
+## Futures
+
+| Option | Use it when | Page |
+| ------ | ----------- | ---- |
+| `@kosFutureAware({ handlerProperty })` | existing code already reads the future handler under another name | Futures, last section |
+| `@kosFutureAware({ mode: 'minimal' })` | the model wants only the handler, none of the status properties | not shown |
+| `@kosFuture({ alias, namespace, abortController, trackerPolicy })` | the operation must be cancellable, or its progress must be tracked through the request context | Futures |
+
+## Topics
+
+| Option | Use it when | Page |
+| ------ | ----------- | ---- |
+| `lifecycle` | the subscription must exist before a phase (`INIT`, to catch events during the baseline) or be disposed on deactivate (`ACTIVATE`) | Topic Handlers, Lifecycle Race Conditions |
+| `condition`, `filter`, `transform`, `once` | only some events should reach the method, or in a different shape | Topic Filtering |
+| `debounce`, `throttle`, `buffer` | events arrive faster than the model should react | Topic Rate Control |
+| `flow` | batches, rate limits and retries on one subscription | Topic Flow Control |
+| `wildcardName`, `destinationAddress`, `explicitDestination` | the topic is a pattern, or events are addressed to this client | Topic Addressing |
+| `requiresBaseline`, `replay` | a delta can arrive before the baseline it amends | Lifecycle Race Conditions |
+| `skipParse` | the raw body is needed; internal | Topic Handlers, last section |
+
+## Service requests
+
+| Option | Use it when | Page |
+| ------ | ----------- | ---- |
+| `iterateOver`, `mappings`, `modelFactory`, `idExtractor` | a list response should become child models | Service Mapping |
+| `cache` | a lifecycle response must stay readable after the handler | Service Caching |
+| `errorHandler` | the default log-and-continue policy is not the right one | Service Errors |
+| `condition`, `requestOptions` | a lifecycle request should be skipped for some instances, or needs transport options | Services, last section |
+
+## Configuration properties
+
+| Option | Use it when | Page |
+| ------ | ----------- | ---- |
+| `lazy`, `serviceBasePath`, `optionsExpander` | the bean should load on first read, comes from another path, or needs custom choices | Config Properties |
+| `converter`, `formatter` | the display unit or number format must differ from the region's default | Config Conversion |
+
+## Everything else
+
+| Option | Use it when | Page |
+| ------ | ----------- | ---- |
+| `@kosLoggerAware({ loggerProperty, loggerContext })` | the model already has a `logger` member, or logs should carry a different context name | Logging |
+| `@kosViewModel({ devToolsEnabled })` | the view model's state should be visible in the devtools | View Models |
+| `@kosModel({ optionsRequired })` | constructing the model without options is a mistake worth failing on | Model Dependencies, "optionsRequired" |
+
+`singleton` on `@kosModel` is not on this list: it has no default and is always
+written.

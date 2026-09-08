@@ -1,0 +1,105 @@
+{
+  "name": "core-concept-models",
+  "type": "kos.model",
+  "version": "0.0.0-SNAPSHOT",
+  "models": {
+    "counter": {
+      "name": "counter",
+      "type": "counter-model",
+      "singleton": false,
+      "factory": "Counter",
+      "purpose": "a count with a floor of zero; the minimum model with state and a lifecycle"
+    },
+    "widget": {
+      "name": "widget",
+      "type": "widget-model",
+      "singleton": false,
+      "factory": "Widget",
+      "purpose": "a thing that receives device frames; the host for every topic-handler exemplar"
+    },
+    "document": {
+      "name": "document",
+      "type": "document-model",
+      "singleton": false,
+      "factory": "Document",
+      "purpose": "the codex document on Studio: owns the notes served by /api/codex/objects; host for every service-request exemplar",
+      "container": true
+    },
+    "user": {
+      "name": "user",
+      "type": "user-model",
+      "singleton": false,
+      "factory": "User",
+      "purpose": "a member of a team; the child model in every container exemplar, parent-aware so it can reach its team",
+      "managedBy": ["team"]
+    },
+    "team": {
+      "name": "team",
+      "type": "team-model",
+      "singleton": false,
+      "factory": "Team",
+      "purpose": "a team that owns its users in place; host for the container exemplars",
+      "container": true
+    },
+    "note": {
+      "name": "note",
+      "type": "note-model",
+      "singleton": false,
+      "factory": "Note",
+      "purpose": "one Studio codex object (id + desc); the child of document in the service-mapping and container-capacity exemplars",
+      "managedBy": ["document", "journal"]
+    },
+    "project": {
+      "name": "project",
+      "type": "project-model",
+      "singleton": false,
+      "factory": "Project",
+      "purpose": "a project that depends on other models and owns a capped collection of tasks; host for the model-dependencies and container-capacity exemplars",
+      "container": true
+    },
+    "task": {
+      "name": "task",
+      "type": "task-model",
+      "singleton": false,
+      "factory": "Task",
+      "purpose": "a long-running piece of work on Studio; host for the futures and multi-futures exemplars",
+      "managedBy": ["project"]
+    },
+    "session": {
+      "name": "session",
+      "type": "session-model",
+      "singleton": false,
+      "factory": "Session",
+      "purpose": "a user session with an explicit lifecycle; host for the state-machine, state-properties, companion and troubles exemplars"
+    },
+    "timer": {
+      "name": "timer",
+      "type": "timer-model",
+      "singleton": false,
+      "factory": "Timer"
+    },
+    "device": {
+      "name": "device",
+      "type": "device-model",
+      "singleton": true,
+      "factory": "Device",
+      "purpose": "stands in for the device: publishes frames and out-of-band object changes through the codex backend's test endpoints"
+    },
+    "journal": {
+      "name": "journal",
+      "type": "journal-model",
+      "singleton": false,
+      "factory": "Journal",
+      "purpose": "a list of notes whose baseline read races its own delta, for the topic catch-up exemplar",
+      "container": true
+    }
+  },
+  "generator": {
+    "projectType": "model",
+    "defaults": {
+      "model": {
+        "folder": "models"
+      }
+    }
+  }
+}

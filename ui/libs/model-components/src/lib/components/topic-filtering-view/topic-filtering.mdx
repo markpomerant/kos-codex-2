@@ -1,0 +1,76 @@
+import { Canvas, Meta } from "@storybook/addon-docs/blocks";
+
+import { Snippet } from "../../snippet";
+import * as Stories from "./topic-filtering-view.stories";
+
+<Meta title="Topics/Topic Filtering" />
+
+# Topic Filtering
+
+Four options on `@kosTopicHandler` decide which events reach the method and
+in what shape: `condition`, `filter`, `transform` and `once`. `condition` and
+`filter` drop events, `transform` reshapes the payload, and `once` limits the
+handler to the first matching event.
+
+## How it was built
+
+| Step | Command |
+| ---- | ------- |
+| Add the state fields | kos-codegen `add_property`: `threshold`, `alerts`, `evenSamples`, `firstEventAt`, `reading` |
+| Add the handlers | kos-codegen `add_topic_handler` for `onHighTemperature`, `onEvenSample`, `onFirstEvent`, `onReading`, each on its own topic |
+| Generate the component | `kosui component --name topic-filtering-view --project model-components` |
+
+Each snippet below shows the field the handler writes together with the
+handler itself.
+
+## condition (gate on the parsed payload and the model)
+
+`condition(payload, model, raw)` runs after parsing and after `transform`.
+It receives the payload the method would receive and the model itself, so a
+predicate can read model state. Here `threshold` is a plain field on the
+widget, and the predicate reads it through `model`. The generic parameters
+name the payload and model types.
+
+<Snippet name="topic-condition@widget-model.ts" />
+
+## filter (gate on the raw event)
+
+`filter(raw)` runs before parsing. It receives the transport envelope:
+`headers` and the body **as a string**. This page verifies that at runtime:
+the predicate parses the body itself. Use `filter` when the decision can be
+made from headers alone; use `condition` when it needs the parsed payload or
+the model.
+
+<Snippet name="topic-filter@widget-model.ts" />
+
+## transform (reshape before the method)
+
+`transform(payload)` turns the parsed device shape into the model's shape.
+The method is typed against the transformed shape, and `condition` sees the
+transformed value too. The third generic parameter is the transformed type.
+
+<Snippet name="topic-transform@widget-model.ts" />
+
+## once (run for the first matching event only)
+
+`once: true` wraps the handler so that only the first matching event runs it.
+The subscription manager also remembers the topic as consumed, so a later
+re-registration does not resubscribe it.
+
+<Snippet name="topic-once@widget-model.ts" />
+
+`once` shares its slot with `debounce`, `throttle` and `buffer`: the framework
+applies a single one of those wrappers per handler, chosen in that priority
+order. A handler with both `debounce` and `once` is only debounced.
+
+## The view
+
+<Snippet name="topic-filtering-view@topic-filtering-view.tsx" />
+
+<Snippet name="topic-filtering-story@topic-filtering-view.stories.tsx" />
+
+<Canvas of={Stories.TopicFilteringStory} sourceState="none" />
+
+An alert of 25 leaves `alerts` alone; 35 increments it. Six samples yield
+three even ones. The second "first event" changes nothing. The two readings
+render as `21.5 °C (mild)` and `34.0 °C (hot)`.

@@ -1,0 +1,64 @@
+import { Canvas, Meta } from "@storybook/addon-docs/blocks";
+
+import { Snippet } from "../../snippet";
+import * as Stories from "./topic-addressing-view.stories";
+
+<Meta title="Topics/Topic Addressing" />
+
+# Topic Addressing
+
+Two options decide **which** events a subscription receives: a trailing
+wildcard with a named capture, and a destination address for the subscription
+itself. The options on the other topic pages decide what happens to a event
+after it is received.
+
+## How it was built
+
+| Step | Command |
+| ---- | ------- |
+| Add the fields | kos-codegen `add_property`: `wildcardPath: string`, `addressedEvents: number` |
+| Add the handlers | kos-codegen `add_topic_handler` for `onZoneEvent` on `/codex/widget/zone/*` and `onAddressedEvent` |
+| Generate the component | `kosui component --name topic-addressing-view --project model-components` |
+
+Each snippet below shows the field the handler writes together with the
+handler itself.
+
+## wildcardName (capture the tail of a wildcard topic)
+
+A topic ending in `/*` subscribes to everything under the prefix. With
+`wildcardName`, the framework parses the part after the prefix out of the
+event's `topic` header and passes it to the method on the raw envelope as
+`raw.wildcardCapture[name]`. The method's second parameter is that envelope.
+
+<Snippet name="topic-wildcard@widget-model.ts" />
+
+Routing depends on two headers the broker sets on a wildcard delivery.
+`subscription` carries the pattern the model subscribed with; the transport
+dispatches on it. `topic` carries the concrete topic; the capture is parsed
+from it. The story publishes both.
+
+## destinationAddress and explicitDestination
+
+`destinationAddress` puts a `dst-addr` header on the subscribe event so the
+broker routes it to one connection. Without `explicitDestination` the
+transport falls back to a `connId` query parameter or the bridge's connection
+id when no address is given; with `explicitDestination: true` the value is
+used as written, even when empty.
+
+<Snippet name="topic-destination@widget-model.ts" />
+
+Verified with the transport recorder: the subscribe event for this topic
+carries `dst-addr: codex-device`; the wildcard subscription's event carries
+no address.
+
+## The view
+
+<Snippet name="topic-addressing-view@topic-addressing-view.tsx" />
+
+<Snippet name="topic-addressing-story@topic-addressing-view.stories.tsx" />
+
+<Canvas of={Stories.TopicAddressingStory} sourceState="none" />
+
+The two `fos` and `bridge` options select the FOS broker transport. They are
+marked `@internal` in the SDK and need a FOS-capable device, so the codex
+does not teach them.

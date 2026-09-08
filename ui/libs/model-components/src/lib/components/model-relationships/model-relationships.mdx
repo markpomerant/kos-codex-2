@@ -1,0 +1,69 @@
+import { Meta } from "@storybook/addon-docs/blocks";
+
+import { Snippet } from "../../snippet";
+
+<Meta title="Foundations/Model Relationships" />
+
+# Model Relationships
+
+A KOS application is a set of models that each own one thing, related to each
+other so that the whole represents the system. Two relationships do most of
+the work: a **dependency**, where a model reads another model it does not
+own, and **containment**, where a model owns a collection of child models.
+Companions and context complete the set. This page names them and says which
+page goes further; the detail pages are under Relationships and Containers.
+
+| Relationship | Meaning | Decorator | Pages |
+| ------------ | ------- | --------- | ----- |
+| Dependency | this model reads a model it does not own | `@kosDependency` | Model Dependencies, Computed Properties, Prop Keys |
+| Containment | this model owns a collection of children | `@kosContainerAware`, `@kosChild` | Container Models, Container Indexes, Container Capacity |
+| Context | a value set by an owner, readable by everything created under it | `kosContext` on the creation context | Parent And Child, Context And Reload |
+| Parent awareness | a child that must call up to its owner | `@kosParentAware` | Parent And Child |
+| Companion | behaviour attached to a model you do not own, created alongside it | `@kosCompanion` | Companion Models |
+
+## Dependency: consume without owning
+
+A dependency injects a reference to another model, resolved by type and id
+and created if needed. The dependent reads it in computed properties and
+recomputes when it changes. The owner keeps its topics, requests and
+configuration; the dependent has none of that. This is how one model can be
+responsible for reading the temperature while any number of models use the
+reading.
+
+<Snippet name="project-dependency@project-model.ts" />
+
+## Containment: own a collection
+
+A container-aware model owns a collection of child models of one type. The
+decorator alone injects the container, the `models` and `data` readers, and
+the add and remove methods; options such as indexes and sorting are added when
+a model needs them. A single owned child is declared with `@kosChild`. The
+parent is responsible for its children's lifecycle; a component reads the
+collection from the parent.
+
+<Snippet name={["journal-container@journal-model.ts", "team-lead@team-model.ts"]} />
+
+## Context: what flows down
+
+A parent sets a key on its creation context once, and every model created
+under it reads that key. A child learns which team it belongs to without a
+reference to the team. Parent awareness, a child calling up to its owner, is
+the exception, not the default.
+
+<Snippet name={["team-context-key@team-model.ts", "user-team-id@user-model.ts"]} />
+
+## Companion: attach without owning
+
+A companion is created whenever its parent type is created and attached to it.
+It adds behaviour to a model whose code does not reference it.
+
+<Snippet name="timer-companion@timer-model.ts" />
+
+## Putting them together
+
+Decide what each model is responsible for. Give it the communication pattern
+that brings in its data (Communication Patterns). Where a model needs another
+model's data, use a dependency and a computed property. Where a model owns
+several of a kind, use a container. Where a value belongs to everything under
+an owner, set it on the context. The rest of the codex is how to do each of
+those with the tooling.

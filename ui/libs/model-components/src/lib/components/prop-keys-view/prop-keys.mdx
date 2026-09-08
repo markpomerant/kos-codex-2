@@ -1,0 +1,83 @@
+import { Canvas, Meta } from "@storybook/addon-docs/blocks";
+
+import { Snippet } from "../../snippet";
+import * as Stories from "./prop-keys-view.stories";
+
+<Meta title="Foundations/Prop Keys" />
+
+# Prop Keys
+
+A decorator option is written once, on the class, and every instance of the
+model shares it. A PropKey makes such an option read a value from the instance
+instead. It is a placeholder string the framework replaces with a model
+property at the moment the option is used: when a topic is subscribed, when a
+service request is sent, or when a dependency is resolved. The property can be
+plain state or a computed property.
+
+Two forms exist:
+
+- `{MODEL_ID}` is replaced with the instance's id.
+- `createPropKey<Model>('name')` produces `{PROP_name}`, which is replaced
+  with `instance.name`. The type argument checks that the property exists.
+
+## How it was built
+
+| Step | Command |
+| ---- | ------- |
+| The computed property | kos-codegen `add_computed` on `widget`: `zone`, derived from the id |
+| The handlers | kos-codegen `add_topic_handler` twice: `onOwnReading` on `/codex/widget/{MODEL_ID}/reading`, and `onZoneStatus` on a topic constant built with `createPropKey` |
+| The dependency | on `project`, kos-codegen `add_property` for `teamKey` and the existing `add_dependency`, with its `id` changed to `createPropKey<ProjectModelImpl>('teamKey')` |
+| The counters | kos-codegen `add_property` for `ownReadings` and `zoneEvents` |
+
+## Where a PropKey is substituted
+
+| Option | Decorator | Source of the value |
+| ------ | --------- | ------------------- |
+| `topic`, `destinationAddress` | `@kosTopicHandler` | the instance, when the subscription is made |
+| `path`, `pathParams`, `queryParams` | `@kosServiceRequest` | the instance, when the request is sent |
+| `id`, `options` | `@kosDependency` | the instance, when the dependency is resolved |
+| `path` | `@kosConfigProperty` | the instance, since the config property is a dependency whose options carry the path |
+
+## A topic per instance
+
+`{MODEL_ID}` in a topic gives every widget its own subscription. A message
+published for `widget-north` reaches that widget only.
+
+<Snippet name="topic-model-id@widget-model.ts" />
+
+## A topic from a computed property
+
+`zone` is a computed property. The topic constant embeds
+`createPropKey<WidgetModelImpl>('zone')`, so the subscription is made on
+`/codex/zone/north/status` for `widget-north` and on `/codex/zone/south/status`
+for `widget-south`. Any model property works here, including one derived from
+options or from other state.
+
+<Snippet name={["widget-zone@widget-model.ts", "topic-prop-key@widget-model.ts"]} />
+
+## A dependency chosen by the instance
+
+The project's team is resolved by id. With a PropKey as the id, the id is
+read from the project's `teamKey` property when the dependency is resolved,
+so two projects can depend on two different teams from one decorator.
+
+<Snippet name="project-dependency@project-model.ts" />
+
+## Service requests
+
+The same substitution applies to a request's `path`, `pathParams` and
+`queryParams`. With the typed `serviceRequest` form the parameter types come
+from the API spec, so a PropKey string is accepted where the parameter is a
+string. The codex backend's object ids are integers, so this page shows the
+mechanism on topics and dependencies.
+
+## The view
+
+Two widgets, two zones. Each device button publishes on one instance's topic
+and only that instance's counter moves.
+
+<Snippet name="prop-keys-view@prop-keys-view.tsx" />
+
+<Snippet name="prop-keys-story@prop-keys-view.stories.tsx" />
+
+<Canvas of={Stories.PropKeysStory} sourceState="none" />

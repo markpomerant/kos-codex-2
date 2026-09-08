@@ -1,0 +1,5 @@
+.DS_Store
+target/
+*.log
+# repo-local toolchain provisioned by build/nodew.sh
+.kos/

@@ -1,0 +1,552 @@
+{
+  "$comment": "Which exemplar page demonstrates which decorator options. Every option in the SDK surface must be claimed by exactly one page, or explicitly deferred. A page may claim options across several decorators when they teach one concept. Options are written as LITERALS in the exemplar source - never Storybook args - so the extracted snippet is the lesson.",
+  "$provenance": "Option side: decorator-surface-full.json, extracted mechanically from SDK source. Page grouping: the concept organisation of the previous codex (futures, state-machine, config-property, container-models, topic-handlers, event-bus...). This is a STARTING POINT, not a fixed plan - validate each page against kos://decorator/* and kos://guide/* and change what does not hold up.",
+  "vocabulary": [
+    "counter",
+    "widget",
+    "team",
+    "user",
+    "task",
+    "session",
+    "timer",
+    "document",
+    "note",
+    "project"
+  ],
+  "deferred": {
+    "kosReference": {
+      "options": [
+        "modelType"
+      ],
+      "reason": "Believed not to work as documented; excluded until the behaviour is confirmed."
+    },
+    "kosModel": {
+      "options": [
+        "autoRegister"
+      ],
+      "reason": "Being deprecated. Auto-registration is a hack with many failure modes; models are registered explicitly in the app's registration chain. The codex must not teach it as a normal option."
+    },
+    "kosSubscribe": {
+      "options": [
+        "topic",
+        "websocket",
+        "handler",
+        "condition",
+        "skipParse"
+      ],
+      "reason": "Marked @deprecated and @internal in SDK source (kosSubscribe.ts: warnDeprecated → replacement @kosTopicHandler, removeAt 3). The codex must not teach a decorator scheduled for removal."
+    },
+    "kosTopicHandler": {
+      "options": [
+        "fos",
+        "bridge"
+      ],
+      "reason": "Marked @internal in IKosTopicHandlerParams; they select the FOS broker transport, which needs a FOS-capable device and cannot be demonstrated against KosMock."
+    },
+    "kosServiceRequest": {
+      "options": [
+        "queryParams",
+        "extensions"
+      ],
+      "reason": "queryParams: none of the Studio endpoints the codex uses declares query parameters, and the typed decorator rejects untyped ones. extensions: declared in IKosServiceRequestParams but no code path in the request manager reads it (verified in SDK source), so nothing can be demonstrated."
+    },
+    "kosContainerAware": {
+      "options": [
+        "containerOptions.parentId",
+        "legacy",
+        "includeGetters",
+        "includeMethods"
+      ],
+      "reason": "containerOptions.parentId is inferred from the owning model's id; legacy switches the container property to the pre-decorator `_models` name. includeGetters and includeMethods default to true and are only meaningful as false, to keep the decorator from injecting members a class already defines. All four are migration controls the codex leaves out."
+    },
+    "kosStateProp": {
+      "options": [
+        "path",
+        "attribute"
+      ],
+      "reason": "Binds to the device State service (/api/kos/state). The codex runs against the codex backend, whose OpenAPI has no state service (checked: no /api/state paths), so nothing can be projected."
+    },
+    "kosStateBean": {
+      "options": [
+        "path"
+      ],
+      "reason": "Same as kosStateProp: no state service on the codex backend."
+    },
+    "kosParentAware": {
+      "options": [
+        "parentId"
+      ],
+      "reason": "Names a non-default option key for the parent id; exists for options shapes from legacy code. New models use the default kosParentId and let the container set the parent, so the codex does not demonstrate it."
+    },
+    "kosCompanion": {
+      "options": [
+        "excludeProperties"
+      ],
+      "reason": "Only read in decorator mode (it lists parent members not to proxy). The codex's companion is a composition companion, so there is no honest home for it."
+    }
+  },
+  "pages": [
+    {
+      "page": "simple-model",
+      "models": [
+        "counter"
+      ],
+      "claims": {
+        "kosModel": [
+          "modelTypeId",
+          "singleton"
+        ]
+      },
+      "teaches": "The minimum model: a type id, a lifecycle, and where registration actually happens."
+    },
+    {
+      "page": "model-relationships",
+      "models": [],
+      "claims": {},
+      "teaches": "How models compose into a system: dependency (read a model you do not own) and containment (own children) as the two primary relationships, with context, parent awareness and companions."
+    },
+    {
+      "page": "communication-patterns",
+      "models": [],
+      "claims": {},
+      "teaches": "The ways a model talks to the backend, each a decorator: service requests, topics, configuration properties, futures, troubles (state beans deferred); which to use when."
+    },
+    {
+      "page": "computed-properties",
+      "models": [
+        "project",
+        "counter",
+        "team"
+      ],
+      "claims": {},
+      "teaches": "A computed model property derives from other properties, including models injected by @kosDependency, so a model consumes another model's state and reacts to it without owning it."
+    },
+    {
+      "page": "prop-keys",
+      "models": [
+        "widget",
+        "project"
+      ],
+      "claims": {},
+      "teaches": "A PropKey ({MODEL_ID} or createPropKey) makes a decorator option read a model property per instance: topic paths, service request params, dependency ids and options. The options themselves are claimed by the Topic Handlers and Model Dependencies pages; this page teaches the substitution."
+    },
+    {
+      "page": "topic-handlers",
+      "models": [
+        "widget"
+      ],
+      "claims": {
+        "kosTopicHandler": [
+          "topic",
+          "websocket",
+          "lifecycle",
+          "skipParse"
+        ]
+      },
+      "teaches": "websocket:true subscribes the method to transport frames; websocket:false subscribes it to the in-app EventBus. lifecycle picks the phase that registers the subscription. skipParse (marked @internal) hands over the unparsed body."
+    },
+    {
+      "page": "topic-filtering",
+      "models": [
+        "widget"
+      ],
+      "claims": {
+        "kosTopicHandler": [
+          "condition",
+          "filter",
+          "once",
+          "transform"
+        ]
+      },
+      "teaches": "Narrowing which frames reach a handler, reshaping the payload, and handlers that fire exactly once."
+    },
+    {
+      "page": "topic-rate-control",
+      "models": [
+        "widget"
+      ],
+      "claims": {
+        "kosTopicHandler": [
+          "debounce",
+          "throttle",
+          "buffer",
+          "buffer.maxSize",
+          "buffer.time"
+        ]
+      },
+      "teaches": "Side by side: debounce hands the handler an ARRAY of the quiet window, throttle keeps one frame per window, buffer bounds by size or time. They are mutually exclusive: one wrapper per handler."
+    },
+    {
+      "page": "topic-flow-control",
+      "models": [
+        "widget"
+      ],
+      "claims": {
+        "kosTopicHandler": [
+          "flow",
+          "flow.backpressure",
+          "flow.batch",
+          "flow.errorHandling",
+          "flow.filter",
+          "flow.rateLimit",
+          "flow.transform"
+        ]
+      },
+      "teaches": "The flow object is a separate pipeline from the top-level shortcuts: transform sees raw frames, a partial batch waits for the next event, rateLimit drops rather than throttles."
+    },
+    {
+      "page": "lifecycle-race-conditions",
+      "models": [
+        "journal",
+        "device"
+      ],
+      "claims": {
+        "kosTopicHandler": [
+          "replay",
+          "replay.bufferSize",
+          "requiresBaseline",
+          "requiresBaseline.method",
+          "requiresBaseline.path",
+          "requiresBaseline.replayStrategy"
+        ]
+      },
+      "teaches": "Both halves of not missing frames: hold a delta handler until the baseline request on the same path has answered (and replay what queued meanwhile), and keep the last frames on a topic for late subscribers."
+    },
+    {
+      "page": "topic-addressing",
+      "models": [
+        "widget"
+      ],
+      "claims": {
+        "kosTopicHandler": [
+          "wildcardName",
+          "destinationAddress",
+          "explicitDestination"
+        ]
+      },
+      "teaches": "Trailing-wildcard subscriptions with a named capture, and addressing a subscription to a specific destination."
+    },
+    {
+      "page": "container-models",
+      "models": [
+        "team",
+        "user"
+      ],
+      "claims": {
+        "kosContainerAware": [
+          "containerOptions",
+          "containerOptions.extensionId",
+          "containerProperty",
+          "modelsProperty"
+        ],
+        "kosChild": []
+      },
+      "teaches": "A container owns a collection and the events that change it, and what the decorator injects can be renamed or trimmed."
+    },
+    {
+      "page": "container-indexes",
+      "models": [
+        "team",
+        "user"
+      ],
+      "claims": {
+        "kosContainerAware": [
+          "containerOptions.indexMap",
+          "containerOptions.sortKey"
+        ]
+      },
+      "teaches": "Indexes make a container queryable without scanning; property-based and function-based forms."
+    },
+    {
+      "page": "container-capacity",
+      "models": [
+        "project",
+        "task"
+      ],
+      "claims": {
+        "kosContainerAware": [
+          "containerOptions.maxCapacity",
+          "containerOptions.evictionStrategy",
+          "containerOptions.evictionBatchSize",
+          "containerOptions.customEvictionFilter"
+        ]
+      },
+      "teaches": "Capacity as a safety net: the container evicts and destroys overflow, and fifo, lru or a custom filter decide what goes."
+    },
+    {
+      "page": "services",
+      "models": [
+        "document"
+      ],
+      "claims": {
+        "kosServiceRequest": [
+          "path",
+          "method",
+          "lifecycle",
+          "body",
+          "pathParams",
+          "requestOptions",
+          "condition"
+        ]
+      },
+      "teaches": "A declarative service request, and the error-first tuple it returns."
+    },
+    {
+      "page": "service-mapping",
+      "models": [
+        "document",
+        "note"
+      ],
+      "claims": {
+        "kosServiceRequest": [
+          "mappings",
+          "transform",
+          "modelFactory",
+          "iterateOver",
+          "idExtractor"
+        ]
+      },
+      "teaches": "Turning a response payload into models without hand-written mapping code."
+    },
+    {
+      "page": "service-caching",
+      "models": [
+        "document"
+      ],
+      "claims": {
+        "kosServiceRequest": [
+          "cache",
+          "cache.ttl",
+          "cache.maxSize",
+          "cache.retention",
+          "cache.extendOnRefresh"
+        ]
+      },
+      "teaches": "Response caching, and what extendOnRefresh changes about expiry."
+    },
+    {
+      "page": "service-errors",
+      "models": [
+        "document"
+      ],
+      "claims": {
+        "kosServiceRequest": [
+          "errorHandler",
+          "errorHandler.strategy",
+          "errorHandler.onError",
+          "errorHandler.defaultValue"
+        ]
+      },
+      "teaches": "Failure policy declared with the request instead of repeated at every call site."
+    },
+    {
+      "page": "futures",
+      "models": [
+        "task"
+      ],
+      "claims": {
+        "kosFutureAware": [
+          "mode",
+          "handlerProperty"
+        ],
+        "kosFuture": [
+          "alias",
+          "namespace",
+          "abortController",
+          "trackerPolicy"
+        ]
+      },
+      "teaches": "A long-running device operation as one awaitable future with a phase stream, plus cancellation and what trackerPolicy counts as still running."
+    },
+    {
+      "page": "multi-futures",
+      "models": [
+        "session",
+        "timer"
+      ],
+      "claims": {
+        "kosMultipleFutureAware": [
+          "mode",
+          "handlerProperty"
+        ]
+      },
+      "teaches": "Why concurrent operations need the multiple-future form: a single futureAware shares one slot, so two calls collide."
+    },
+    {
+      "page": "config-properties",
+      "models": [
+        "widget"
+      ],
+      "claims": {
+        "kosConfigProperty": [
+          "path",
+          "attribute",
+          "lazy",
+          "serviceBasePath",
+          "optionsExpander"
+        ],
+        "kosConfigBean": [
+          "path",
+          "lazy",
+          "serviceBasePath"
+        ]
+      },
+      "teaches": "Binding a model field to device configuration, binding a whole subtree, and what lazy defers."
+    },
+    {
+      "page": "config-conversion",
+      "models": [
+        "widget"
+      ],
+      "claims": {
+        "kosConfigProperty": [
+          "converter",
+          "converter.from",
+          "converter.to",
+          "converter.measure",
+          "formatter"
+        ]
+      },
+      "teaches": "Unit conversion and display formatting at the binding, not in the view."
+    },
+    {
+      "page": "model-dependencies",
+      "models": [
+        "project",
+        "team",
+        "counter"
+      ],
+      "claims": {
+        "kosDependency": [
+          "modelType",
+          "lifecycle",
+          "id",
+          "options",
+          "resolutionPolicy"
+        ],
+        "kosModel": [
+          "optionsRequired"
+        ]
+      },
+      "teaches": "Declaring a dependency on another model, which lifecycle phase resolves it, and optionsRequired: the dependency target's guard against being created with no options."
+    },
+    {
+      "page": "parent-and-child",
+      "models": [
+        "team",
+        "user"
+      ],
+      "claims": {},
+      "teaches": "Reaching the owning model, and what child lifecycle ownership means for cleanup."
+    },
+    {
+      "page": "companion-models",
+      "models": [
+        "session",
+        "timer"
+      ],
+      "claims": {
+        "kosCompanion": [
+          "mode",
+          "lifecycle",
+          "parentProperty"
+        ]
+      },
+      "teaches": "Attaching behaviour to a model you do not own."
+    },
+    {
+      "page": "state-machine",
+      "models": [
+        "session"
+      ],
+      "claims": {
+        "kosStateMachine": [
+          "initial",
+          "states",
+          "initializeAt"
+        ],
+        "kosStateGuard": [
+          "allowedStates",
+          "throwOnInvalid"
+        ],
+        "kosStateEntry": [],
+        "kosStateExit": []
+      },
+      "teaches": "Lifecycle as an explicit machine with entry and exit hooks; throwOnInvalid lives on the guard, not on the machine config."
+    },
+    {
+      "page": "model-effects",
+      "models": [
+        "counter"
+      ],
+      "claims": {
+        "kosModelEffect": [
+          "dependencies",
+          "options",
+          "options.fireImmediately"
+        ]
+      },
+      "teaches": "Reacting to a change without a topic, and whether the effect runs on registration."
+    },
+    {
+      "page": "view-models",
+      "models": [
+        "widget"
+      ],
+      "claims": {
+        "kosViewModel": [
+          "typeId",
+          "devToolsEnabled"
+        ]
+      },
+      "teaches": "A model shaped for a view rather than for the device."
+    },
+    {
+      "page": "troubles",
+      "models": [
+        "session"
+      ],
+      "claims": {
+        "kosTroubleAware": [
+          "pathProperty"
+        ]
+      },
+      "teaches": "Surfacing device faults through a model."
+    },
+    {
+      "page": "logging",
+      "models": [
+        "counter",
+        "session"
+      ],
+      "claims": {
+        "kosLoggerAware": [
+          "loggerProperty",
+          "loggerContext"
+        ],
+        "kosLogger": [
+          "group"
+        ]
+      },
+      "teaches": "Per-model logging with a named context, and grouping the output of one method."
+    },
+    {
+      "page": "context-and-reload",
+      "models": [
+        "user",
+        "document"
+      ],
+      "claims": {
+        "kosContext": [],
+        "kosReloadAware": []
+      },
+      "teaches": "What the creation context carries, and what the framework calls on reload - a model never calls reload itself."
+    },
+    {
+      "page": "advanced-options",
+      "models": [],
+      "claims": {},
+      "teaches": "The options that exist for migration, special shapes or specific situations, each with the use case that justifies it and the page that shows it; none is a default to reach for."
+    }
+  ]
+}

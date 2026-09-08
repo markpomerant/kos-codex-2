@@ -1,0 +1,80 @@
+import { Canvas, Meta } from "@storybook/addon-docs/blocks";
+
+import { Snippet } from "../../snippet";
+import * as Stories from "./config-properties-view.stories";
+
+<Meta title="Configuration/Config Properties" />
+
+# Config Properties
+
+Device configuration lives in beans addressed by path, each with
+typed attributes. `@kosConfigProperty` binds one attribute to a model field
+as a `KosConfigProperty`: `value` reads it, `updateProperty` writes it back,
+and the field stays in sync with the backend afterwards. Configuration never
+goes through model options or the constructor.
+
+The `widget` binds to the codex backend's `studio:service:codex` bean, which
+the backend exposes for this purpose.
+
+## How it was built
+
+| Step | Command |
+| ---- | ------- |
+| Each binding | kos-codegen `add_config_property` on `widget`: path `studio:service:codex`, the attribute, and its value type |
+| The service path | the app's registration maps the config service to the codex backend's `/api/config` |
+| The component | `kosui component --name config-properties-view` |
+
+## A binding
+
+`path` and `attribute` are the whole address, and the only inputs the decorator
+requires. The bean loads when the model initialises and is fetched from the
+service path the app's registration maps for configuration.
+
+<Snippet name="config-property@widget-model.ts" />
+
+The next three sections add one option each to a second binding, `colors`,
+on the same bean. Every fragment below sits inside that binding's
+`@kosConfigProperty({ ... })` alongside its `path` and `attribute`.
+
+## lazy
+
+`lazy` defers loading the bean until the property is first read.
+
+<Snippet name="config-lazy@widget-model.ts" />
+
+## serviceBasePath
+
+`serviceBasePath` overrides the mapped service path for one binding. Use it
+when the bean is served from a path other than the one the app-wide mapper
+produces.
+
+<Snippet name="config-service-base-path@widget-model.ts" />
+
+## optionsExpander
+
+`optionsExpander` supplies the choices a UI should offer for the attribute,
+as a fixed list or a function of the unit system and the schema's own values.
+They are exposed as `options`; without an expander, an enum's values are
+offered as they are.
+
+<Snippet name="config-options-expander@widget-model.ts" />
+
+## The whole bean
+
+`@kosConfigBean` binds a whole bean instead of one attribute. `path` is its only
+required input; `lazy` and `serviceBasePath` are available with the same
+meaning as on a property, and are left out here because the defaults (load with
+the model, use the mapped service path) are what this binding wants.
+
+<Snippet name="config-bean@widget-model.ts" />
+
+## The view
+
+<Snippet name="config-properties-view@config-properties-view.tsx" />
+
+<Snippet name="config-properties-view-story@config-properties-view.stories.tsx" />
+
+<Canvas of={Stories.ConfigPropertiesStory} sourceState="none" />
+
+Toggling `enabled` writes to the codex backend and reads back; the change survives a
+reload of the page because it is persisted on the backend.

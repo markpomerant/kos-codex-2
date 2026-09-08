@@ -1,0 +1,50 @@
+import { Canvas, Meta } from "@storybook/addon-docs/blocks";
+
+import { Snippet } from "../../snippet";
+import * as Stories from "./context-and-reload-view.stories";
+
+<Meta title="Lifecycle/Context And Reload" />
+
+# Context and Reload
+
+Two decorators take no options. One adds an argument to a method call; the
+other changes what the framework does with the model on reconnect.
+
+## @kosContext
+
+A method decorated with `@kosContext` receives the model's context bean as
+its last argument. The bean is the same one the constructor got: shared keys
+set by an ancestor resolve through it. Here the caller passes a label and
+the method reads `teamId` off the bean without storing it.
+
+<Snippet name="document-context@document-model.ts" />
+
+## @kosReloadAware
+
+After a reconnect KOS Core reloads every model that has a `reload()` method
+by unloading it and reloading it, which destroys and recreates its children.
+`@kosReloadAware` opts a model out of that: the framework does not unload or
+reload it.
+The annotation sits with the other class-level decorators and takes no
+options.
+
+<Snippet name="document-reload-aware@document-model.ts" />
+
+The model's own `reload()` is then called by its own mechanisms. Here it
+counts the call and reconciles the notes in place through the same
+method-driven request the service-mapping page describes, so the children
+survive the reload.
+
+<Snippet name="document-reload@document-model.ts" />
+
+## The view
+
+<Snippet name="context-and-reload-view@context-and-reload-view.tsx" />
+
+<Snippet name="context-and-reload-view-story@context-and-reload-view.stories.tsx" />
+
+<Canvas of={Stories.ContextAndReloadStory} sourceState="none" />
+
+Press **reload()** and the count climbs while the notes list keeps its
+models. Press **describeContext()** and `contextNote` names the bean the
+call received.

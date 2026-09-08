@@ -1,0 +1,144 @@
+import { Canvas, Meta } from "@storybook/addon-docs/blocks";
+
+import { Snippet } from "../../snippet";
+import * as Stories from "./services-view.stories";
+
+<Meta title="Services/Services" />
+
+# Services
+
+A service request is a typed HTTP call bound to a model method. The path and
+method come from a generated catalog, the framework performs the request over
+the KOS transport, and the model applies the result.
+
+The `document` model talks to the codex backend: a list of objects at
+`/api/codex/objects` that the codex backend maintains in memory for the
+session. The backend derives each object's description as `id=N revision=R`,
+so a modification shows up as a bumped revision.
+
+## How it was built
+
+| Step | Command |
+| ---- | ------- |
+| Pull the codex backend's API types | `kosui api:generate --project=core-concept-models --studio --host=http://127.0.0.1:10010` |
+| Scaffold the model | `kosui model --name document --project core-concept-models` |
+| Give it the notes container | kos-codegen `add_container_support`: property `notes`, child `NoteModel` |
+| Add the requests | kos-codegen `add_service_request` once per method: the path, the HTTP method, and either a lifecycle or "method" mode |
+| Register, hook, component | `register_model`, `kosui model:hook --modelName document`, `kosui component --name services-view` |
+
+`add_service_request` writes three things: a catalog entry in the model's
+`services/` module, a data type plus an identity mapper for that endpoint, and
+the decorated method with a TODO body. The mapper converts the wire shape into
+the model's shape. It starts as the identity, and `executeServiceRequest`
+returns whatever the mapper returns, so editing the mapper changes the type the
+method receives. `add_service_request` rejects a path the generated types do
+not declare, so every catalog entry matches the spec.
+
+## The endpoint catalog
+
+Each endpoint is described once, as `endpoint(path, method)`, in a `const`
+object the model imports. The first request the model needs is the list, so
+the catalog starts with a `GET` on `/api/codex/objects`. The path is checked
+against the codex backend's OpenAPI types at compile time; a typo does not build.
+
+<Snippet name="endpoint-catalog@document-services.ts" />
+
+The writes join it one entry at a time. The same path with a different HTTP
+method is a different endpoint, and `{id}` in a path becomes a typed path
+parameter the request must supply.
+
+<Snippet name="endpoint-writes@document-services.ts" />
+
+Two more reads complete the catalog: the statistics aggregate the caching page
+uses and the single-object read the error-handling page uses.
+
+<Snippet name="endpoint-reads@document-services.ts" />
+
+## Lifecycle-driven: load with the model
+
+With `lifecycle: DependencyLifecycle.LOAD` the framework performs the request
+during the LOAD phase, before the model's own `load()`, and calls the method
+back error-first with `(error, data)`. The request has no execution context:
+it cannot be re-invoked by hand.
+
+The statistics request is the simplest lifecycle request in the model: one
+payload, two fields. `lifecycle` is the one input it needs beyond the endpoint.
+`transform` is the generated identity mapper; the mapper is where the payload's
+shape is made, so it stays on the request even while it is the identity, and
+editing it changes the type the method receives. Every other option on the
+decorator has a default.
+
+<Snippet name="service-load@document-model.ts" />
+
+## Method-driven: mutations and reloads
+
+Without `lifecycle` the request runs when the method is called. Caller
+arguments come first, and the framework injects an execution context as the
+last parameter. This is the shape `add_service_request` leaves behind for
+`addNote`: the decorator with only the endpoint and its mapper, the signature,
+and a body to fill in.
+
+<Snippet name="service-method@document-model.ts" />
+
+The body performs the call through `executeServiceRequest`, which takes the
+model, the injected context and the typed `body`, `pathParams`,
+`queryParams` or `requestOptions` for the call. It guards the context,
+awaits the request, logs a failure through the model's logger and returns the
+response, or `undefined` on failure. The method body then handles only the
+success path: it applies the response to the model.
+
+A write applies its response to the model; it does not read the list again.
+Three cases cover every backend:
+
+- the response carries the changed item: apply that one item;
+- the response carries the whole collection: reconcile it in place, as the
+  reload on the next page does;
+- the response is a bare success: the model already knows what changed and
+  mutates itself.
+
+Adding a note is the first case. The client chooses the id and sends it with
+the description; the backend stores the object and returns it, and the model
+builds the note from the response.
+
+<Snippet name="service-request-body@document-model.ts" />
+
+A path parameter is the same call with a different argument. `modifyNote`
+targets `PUT /api/codex/objects/{id}`; the `{id}` in the catalog entry makes
+`pathParams: { id }` required and typed. The backend returns the
+modified object, so this is the first case again: the one note is updated in
+place.
+
+<Snippet name="service-path-params@document-model.ts" />
+
+`removeNote` is the third case. The backend answers with a bare success and
+the model removes the note it asked to remove.
+
+<Snippet name="service-remove-in-place@document-model.ts" />
+
+Topic handlers carry changes made outside the user's own action; the topic
+pages cover them. The requests on this page do not use them.
+
+## condition and requestOptions
+
+Two more options belong on the lifecycle request above. `condition(model)`
+gates it: the request is skipped for any model the predicate rejects, here an
+instance whose id says it has no statistics.
+
+<Snippet name="service-condition@document-model.ts" />
+
+`requestOptions` sets transport options for the call, such as its time budget
+in milliseconds.
+
+<Snippet name="service-request-options@document-model.ts" />
+
+## The view
+
+<Snippet name="services-view@services-view.tsx" />
+
+<Snippet name="services-view-story@services-view.stories.tsx" />
+
+<Canvas of={Stories.ServicesStory} sourceState="none" />
+
+Press **add note** and a note appears, built from the object the backend
+returned; **modify first** bumps its revision from the returned object;
+**remove last** takes it out on the bare success. No request re-reads the list.

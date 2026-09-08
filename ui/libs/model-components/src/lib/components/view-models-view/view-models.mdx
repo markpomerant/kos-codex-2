@@ -1,0 +1,81 @@
+import { Canvas, Meta } from "@storybook/addon-docs/blocks";
+
+import { Snippet } from "../../snippet";
+import * as Stories from "./view-models-view.stories";
+
+<Meta title="Reactivity/View Models" />
+
+# View Models
+
+UI state, such as which unit a panel shows, which row is expanded, or whether
+a warning is dismissed, lives in a ViewModel, separate from the data model. `@kosViewModel` makes a plain class reactive the way
+a data model is, without registering it or putting it in the model graph.
+`typeId` names it. Everything else on the decorator has a default; the
+`devToolsEnabled` section shows the one option this page also sets.
+
+A component creates one with `useViewModel`, giving it the data models it
+reads from; the instance lives as long as the component.
+
+## How it was built
+
+| Step | Command |
+| ---- | ------- |
+| The class | `WidgetTemperatureViewModel`, written beside the widget model; there is no generator for view models |
+| The decorator | `@kosViewModel` on the class, with `@kosLoggerAware` for a logger |
+| The state | a `unit` field and a constructor that takes the data model |
+| The computed values | `display` and `isHot`, read from the data model and the unit |
+| The action | `toggleUnit`, which changes only ViewModel state |
+| The component | `kosui component --name view-models-view` |
+
+## The decorator
+
+`@kosViewModel` makes the class's fields model properties and its getters computed properties,
+the way `@kosModel` does for a data model. `typeId` names the class in logs
+and in the dev tools; it defaults to the class name, and is written here so the
+name survives a minified build. `@kosLoggerAware` adds a `logger`, as on a
+model.
+
+<Snippet name="view-model-decorator@widget-view-model.ts" />
+
+## devToolsEnabled
+
+ViewModels are not tracked by the KOS dev tools by default. `devToolsEnabled:
+true` registers each instance there under its `typeId`. The fragment sits
+inside the `@kosViewModel({ ... })` above.
+
+<Snippet name="view-model-devtools@widget-view-model.ts" />
+
+## The state and the data model it reads
+
+The ViewModel owns one piece of UI state, the unit to show. The data model
+arrives through the constructor and is kept as a private field; the ViewModel
+reads it, never copies it.
+
+<Snippet name="view-model-state@widget-view-model.ts" />
+
+## Computed values
+
+Computed properties combine model state and ViewModel state. `display` re-derives when
+either the widget's temperature or the chosen unit changes; `isHot` depends
+on the model alone.
+
+<Snippet name="view-model-computed@widget-view-model.ts" />
+
+## An action
+
+A method that changes ViewModel state only. The data model is untouched, so
+nothing else on the page re-renders.
+
+<Snippet name="view-model-action@widget-view-model.ts" />
+
+## The component
+
+The data model still arrives as a prop through the generated HOC; the
+ViewModel is built from it.
+
+<Snippet name="view-models-view@view-models-view.tsx" />
+
+<Canvas of={Stories.ViewModelsStory} sourceState="none" />
+
+Push a temperature event and the display follows; toggle the unit and only
+the ViewModel changes.

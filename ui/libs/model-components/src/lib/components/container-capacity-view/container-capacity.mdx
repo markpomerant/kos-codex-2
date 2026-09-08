@@ -1,0 +1,82 @@
+import { Canvas, Meta } from "@storybook/addon-docs/blocks";
+
+import { Snippet } from "../../snippet";
+import * as Stories from "./container-capacity-view.stories";
+
+<Meta title="Containers/Container Capacity" />
+
+# Container Capacity
+
+`maxCapacity` bounds how many models a container holds. When a container
+grows past it, the container evicts and destroys enough models to get back
+under: `evictionBatchSize` caps how many go in one pass (never more than the
+overflow), and `evictionStrategy` picks which models go. `fifo` drops the
+oldest, `lru` the least recently read, and `custom` asks
+`customEvictionFilter` for candidates.
+
+`project` keeps at most five `task` models and evicts from the tasks already
+done.
+
+## How it was built
+
+| Step | Command |
+| ---- | ------- |
+| Scaffold | `kosui model --name project`, `kosui model --name task --future-aware complete` |
+| The container | kos-codegen `add_container_support`: property `tasks`, child `TaskModel` |
+| The capacity | `maxCapacity`, `evictionBatchSize`, `evictionStrategy` and `customEvictionFilter` added to `containerOptions` |
+| Register, hook, component | `register_model` ×2, `kosui model:hook --modelName project`, `kosui component --name container-capacity-view` |
+
+## The container
+
+A project owns its tasks through `@kosContainerAware`. `containerProperty`
+names the field the container is exposed on and `sortKey` keeps
+`tasks.data` ordered by name. This block sets no limit on how many tasks the
+container holds; the capacity options below add one.
+
+<Snippet name="tasks-container@project-model.ts" />
+
+The interface merge `KosContainerAwareWithProp<TaskModel, 'tasks'>` declares
+the `tasks` field, `addModel` and `removeModel` for the compiler. The class
+body does not declare them; the decorator supplies them at runtime.
+
+<Snippet name="project-interface@project-model.ts" />
+
+## The capacity
+
+Two options bound the container. `maxCapacity` is the ceiling;
+`evictionBatchSize` caps how many models one eviction pass removes, and a
+pass never removes more than the overflow.
+
+<Snippet name="tasks-capacity@project-model.ts" />
+
+## Which models are evicted
+
+`evictionStrategy` chooses the models to evict. `fifo` takes the oldest, `lru`
+the least recently read, and `custom` hands the current models to
+`customEvictionFilter` and evicts from the models it returns, here the tasks
+already marked done. An evicted model is removed from the container and
+destroyed.
+
+<Snippet name="tasks-eviction@project-model.ts" />
+
+## Adding tasks
+
+`addTask` builds a task and hands it to `addModel`, the container's add path;
+the capacity check runs on that path. The project compares the container's
+length before and after the add to count how many tasks were evicted.
+
+<Snippet name="project-add-task@project-model.ts" />
+
+## The view
+
+<Snippet name="container-capacity-view@container-capacity-view.tsx" />
+
+## The story
+
+<Snippet name="container-capacity-view-story@container-capacity-view.stories.tsx" />
+
+<Canvas of={Stories.ContainerCapacityStory} sourceState="none" />
+
+Add three open tasks and two done ones: the container holds five and evicts
+none. Add a sixth and the container is over capacity by one, so it evicts one
+candidate from the custom filter, a done task, and returns to five.

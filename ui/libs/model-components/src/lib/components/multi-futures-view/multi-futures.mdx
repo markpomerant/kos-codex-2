@@ -1,0 +1,81 @@
+import { Canvas, Meta } from "@storybook/addon-docs/blocks";
+
+import { Snippet } from "../../snippet";
+import * as Stories from "./multi-futures-view.stories";
+
+<Meta title="Async/Multi Futures" />
+
+# Multi Futures
+
+`@kosFutureAware` tracks one future at a time: a second operation started
+while the first runs takes over the slot. A model that runs concurrent
+operations uses `@kosMultipleFutureAware` instead, and each `@kosFuture`
+method names its `alias`. The model then carries one slot per alias:
+`shortFuture`, `shortProgress`, `shortStatus`, `cancelShort`, and the same
+for `long`.
+
+The `timer` runs the codex backend's additional-data operation twice, with different
+sizes, as two futures.
+
+## How it was built
+
+| Step | Command |
+| ---- | ------- |
+| The operations | kos-codegen `add_service_request` on `timer`: `startShort` and `startLong`, both `POST /api/codex/objects/additional-data/{numOfItems}` |
+| The decorators | `@kosMultipleFutureAware` and the aliased `@kosFuture`s are written on the model; there is no mutator for them |
+
+## The decorator
+
+`@kosMultipleFutureAware()` sits under `@kosModel`. With no options it
+injects one set of slots per alias onto the model and the handler behind them
+as `futureHandler`. It takes the same two options as `@kosFutureAware`,
+`mode` and `handlerProperty`, with the same defaults; the Futures page
+describes them.
+
+<Snippet name="timer-multi-future@timer-model.ts" />
+
+## The aliases
+
+The merged interface tells TypeScript which slots exist:
+`KosMultipleFutureAwareFull<'short' | 'long'>` declares `shortFuture`,
+`shortProgress`, `longStatus` and the rest, one set per alias.
+
+<Snippet name="timer-merge@timer-model.ts" />
+
+## The short operation
+
+A `@kosFuture` with an `alias` fills that alias's slot. `trackerPolicy:
+'context'` hands the tracker to the service request through `$ctx`, so the
+request's progress becomes the future's progress. The short run asks for two
+items.
+
+<Snippet name="timer-future-short@timer-model.ts" />
+
+## The long operation
+
+The same endpoint and the same shape, under the `long` alias, asking for
+eight items. Because each has its own alias the two run at the same time
+without either taking over the other's slot.
+
+<Snippet name="timer-future-long@timer-model.ts" />
+
+## Following the updates
+
+`onFutureUpdate` receives the alias with each update, so one handler can
+tell the two operations apart.
+
+<Snippet name="timer-future-update@timer-model.ts" />
+
+## The view
+
+The timer is a companion of the session, so the view reaches it with
+`getKosCompanionModel` and reads each alias's `Status` and `Progress`.
+
+<Snippet name="multi-futures-view@multi-futures-view.tsx" />
+
+<Snippet name="multi-futures-view-story@multi-futures-view.stories.tsx" />
+
+<Canvas of={Stories.MultiFuturesStory} sourceState="none" />
+
+Start both: the short one completes while the long one is still reporting
+progress, each in its own slot.

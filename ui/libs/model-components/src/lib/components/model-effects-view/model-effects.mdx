@@ -1,0 +1,64 @@
+import { Canvas, Meta } from "@storybook/addon-docs/blocks";
+
+import { Snippet } from "../../snippet";
+import * as Stories from "./model-effects-view.stories";
+
+<Meta title="Reactivity/Model Effects" />
+
+# Model Effects
+
+`@kosModelEffect` runs a method whenever the values its `dependencies`
+function returns change. It is the reaction for a state change that has no
+topic behind it. The framework owns the subscription: it is set up after the
+model loads and disposed with the model. With `options.fireImmediately` the
+method also runs once at setup, so derived state has a value before the first
+change.
+
+The example extends the `counter` model from *Simple Model*: a `milestone`
+string that follows `count`.
+
+## How it was built
+
+| Step | Command |
+| ---- | ------- |
+| The effect | kos-codegen `add_model_effect` on `counter`: method `onCountChanged` |
+| The derived field | kos-codegen `add_property`: `milestone: string` |
+| The component | `kosui component --name model-effects-view` |
+
+## The effect
+
+The decorator and the method it decorates are one unit. `dependencies` is a
+function of the model returning an array of the values to watch; here it
+returns `count` alone. `options.fireImmediately` asks for one run at setup. The method
+body is the reaction: it derives `milestone` from the current `count`.
+
+<Snippet name="counter-effect@counter-model.ts" />
+
+The method is `async` because the framework awaits it; the counter's reaction
+has nothing to wait for. The model never calls `onCountChanged` itself.
+
+## The state it reads and writes
+
+`count` is the dependency: every assignment to it, from any of the counter's
+actions, re-runs the effect. `milestone` is where the effect writes, an
+ordinary model property with no decorator of its own. A view reading
+`counter.milestone` re-renders when the effect assigns it, the same as for any
+other field.
+
+<Snippet name="counter-effect-state@counter-model.ts" />
+
+## The view
+
+The view reads both fields and does nothing else. Both are ordinary
+model property reads; the view carries no knowledge that one is derived from the
+other.
+
+<Snippet name="model-effects-view@model-effects-view.tsx" />
+
+<Snippet name="model-effects-view-story@model-effects-view.stories.tsx" />
+
+<Canvas of={Stories.ModelEffectsStory} sourceState="none" />
+
+The milestone reads "at the floor" before anything is pressed; that value
+comes from the immediate run. After five presses of **+** it reads "multiple
+of five: 5".

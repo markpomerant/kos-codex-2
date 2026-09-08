@@ -1,0 +1,29 @@
+{
+  "type": "root",
+  "generator": {
+    "defaults": {
+      "model": "kos-codex-2-models",
+      "model-component": "model-components",
+      "ui": "kos-codex-2-ui"
+    }
+  },
+  "development": {
+    "hosts": [
+      {
+        "name": "kos-codex-2-ui",
+        "project": "kos-codex-2-ui",
+        "port": 4200,
+        "type": "cui",
+        "pluginContext": "kos-codex-2",
+        "plugins": []
+      }
+    ],
+    "portRanges": {
+      "kos-codex-2-ui": {
+        "start": 4200,
+        "next": 4201
+      }
+    },
+    "logDir": "/tmp/kos-codex-2-logs"
+  }
+}

@@ -1,0 +1,150 @@
+import { Canvas, Meta } from "@storybook/addon-docs/blocks";
+
+import { Snippet } from "../../snippet";
+import * as Stories from "./counter-view.stories";
+
+<Meta title="Foundations/Simple Model" />
+
+# Simple Model
+
+A KOS model is a class with a **type id**, a **lifecycle**, and model
+state. Those three are the minimum. The model on this page does not talk to a
+device.
+
+`counter` is a count with a floor of zero. It represents a concept with state;
+it does not stand for a part of a machine. A button press in the view is an
+event that calls a method on the model; the model owns the number.
+
+## How it was built
+
+| Step | Command |
+| ---- | ------- |
+| Scaffold the model | `kosui model --name counter --project core-concept-models` |
+| Add the `count` field | kos-codegen `add_property`: `count: number = 0` |
+| Add the `isAtFloor` computed property | kos-codegen `add_computed`: `isAtFloor(): boolean` |
+| Check it | kos-codegen `validate_model` |
+| Register it with the app | kos-codegen `register_model` into `kos-codex-2-ui` |
+| Generate the hook and HOC | `kosui model:hook --modelName counter --project model-components` |
+| Generate the component | `kosui component --name counter-view --project model-components` |
+
+The `add_*` and `register_model` steps are tools of the kos-codegen MCP server;
+the rest are `kosui` commands. The sections below follow the same order.
+
+## The type id
+
+`@kosModel` is the one decorator every model carries. Its config object names
+the type (`modelTypeId`) and says whether the framework keeps one shared
+instance (`singleton: true`) or one per id (`singleton: false`). `singleton`
+has no default: `@kosModel` builds the `Registration` bean only when it is
+set, so every model states it. The type id is a plain string constant;
+everything that later refers to this model by type goes through it.
+
+<Snippet name="counter-model@counter-model.ts" />
+
+The scaffold also applies `@kosLoggerAware`, which is where `this.logger`
+comes from. It sits directly under `@kosModel` on the same class.
+
+<Snippet name="counter-logger@counter-model.ts" />
+
+## Options and the constructor
+
+A model is built from an id and an options object. The options type is the
+model's own; the counter needs nothing, so its interface is empty. The
+constructor signature is fixed: the id, then the options (a third `context`
+argument is available and unused here). It stores the id and copies options
+across as they are. Derived values belong in computed properties; the constructor does not
+compute them.
+
+<Snippet
+  name={[
+    "counter-options@index.d.ts",
+    "counter-constructor@counter-model.ts",
+  ]}
+/>
+
+The lifecycle hooks `init` and `load` are optional and run in that order once
+the model is built. The framework calls them; the model never does.
+
+<Snippet name="counter-lifecycle@counter-model.ts" />
+
+## The state
+
+`count` is a model property. The actions that change it are ordinary
+methods that assign to it: anything rendering `counter.count` re-renders when
+they run. Every property on a `@kosModel` class is observable, so no
+declaration is needed for this.
+
+<Snippet name="counter-count@counter-model.ts" />
+
+## The floor
+
+`isAtFloor` is a computed model property, written as a getter. The framework memoises computed properties, so a derived value
+belongs here rather than in a second field kept in sync by hand. `decrement`
+reads the same computed property and returns early at zero, so the model enforces the
+floor for every view that calls it.
+
+<Snippet name="counter-floor@counter-model.ts" />
+
+## The registration bean
+
+The class exposes a static `Registration` that `@kosModel` fills in. The
+module re-exports it under the model's plain name, alongside the public model
+type; this bean is what the rest of the code imports.
+
+<Snippet name="counter-bean@counter-model.ts" />
+
+`Counter.type` is the type id, `Counter.factory(id)(options)` builds or
+returns an instance, and `Counter.predicate(model)` narrows a generic model to
+a `CounterModel`.
+
+## Where registration happens
+
+`register_model` upserts the bean into the app's registration chain, the file
+declared under `registration.file` in the app's `.kos.json`. Scaffolding on its
+own does not register the model. Registration declares which models an app may
+build; no model code runs until something asks for an instance.
+
+<Snippet name="registration-chain@registration.ts" />
+
+Do not use `autoRegister` (import-time self-registration, being deprecated)
+and do not preload models here. Preload is for the handful of models an app
+needs at boot; everything else is built on demand.
+
+## Reaching the model from React
+
+Model resolution lives in the generated hook, never in a component.
+`useKosModel` looks the model up by type and id, building it on first use,
+and suspends until it is ready.
+
+<Snippet name="use-counter@use-counter.ts" />
+
+The generated HOC wraps that hook and hands the model to a presentational
+component as a prop, inside the SDK's loader so the child only renders once
+the model exists.
+
+<Snippet name="with-counter@with-counter.tsx" />
+
+## The component
+
+`CounterView` receives the model as a prop and never calls `useKosModel`.
+`kosComponent` is the observer wrapper: reading `counter.count` during render
+subscribes this component to it. The connected export is the HOC applied to
+the view; that is what a page renders.
+
+<Snippet
+  name={[
+    "counter-view@counter-view.tsx",
+    "counter-view-connected@counter-view.tsx",
+  ]}
+/>
+
+The story renders the connected view with an id; the model is built on first
+render.
+
+<Snippet name="counter-story@counter-view.stories.tsx" />
+
+<Canvas of={Stories.CounterStory} sourceState="none" />
+
+Press **+** and **−**. `decrement` returns early when `isAtFloor`, and the
+button's disabled state is read from the same computed property, so the model enforces
+the floor.

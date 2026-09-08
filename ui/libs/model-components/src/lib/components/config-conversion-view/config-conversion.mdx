@@ -1,0 +1,127 @@
+import { Canvas, Meta } from "@storybook/addon-docs/blocks";
+
+import { Snippet } from "../../snippet";
+import * as Stories from "./config-conversion-view.stories";
+
+<Meta title="Configuration/Config Conversion" />
+
+# Units, Regions and Formatting
+
+A configuration value is stored on the backend in one unit and shown to a
+person in another, with a number of decimals, a unit symbol, and the choices a
+control should offer. A config property derives all of that from three
+sources, and the view does none of the work:
+
+- the **schema** of the bean, which says what the backend stores;
+- the **region** the device is configured with, which selects a unit system;
+- the **binding**, which may pin a conversion and a format in place of the
+  defaults.
+
+## How it was built
+
+| Step | Command |
+| ---- | ------- |
+| The region | kos-codegen `describe_sdk_model region-info`, then `add_dependency` with the wiring it returns |
+| The bindings | kos-codegen `add_config_property` on `widget` for `volume`, `other_volume` and `unitSystemRangeInterval` on `studio:service:codex` |
+| The service paths | the app's registration maps config to `/api/config` and regions to `/api/regions` on the codex backend |
+| The component | `kosui component --name config-conversion-view` |
+
+## Regions and unit systems
+
+The region service publishes the unit systems a device knows (`si`, `us`)
+and, for each, one unit per measure with its scale, offset and default
+decimals; a region record then names the unit system in force. The SDK's
+`RegionInfo` model reads both, and every config property consults it: the
+region's unit system is the **"to" side of every conversion** unless a
+binding says otherwise. Change the region's unit system and every bound
+value re-derives.
+
+A model reaches the region the same way it reaches any SDK model, with a
+dependency:
+
+<Snippet name="widget-region-dependency@widget-model.ts" />
+
+Through it the model reads the region id, the unit system in force and the
+systems on offer:
+
+<Snippet name="widget-region-read@widget-model.ts" />
+
+and switches the unit system, which is a write to the region on the backend:
+
+<Snippet name="widget-region-write@widget-model.ts" />
+
+## 1. Implicit conversion from the schema
+
+The codex backend's schema declares `volume` as an integer with `format: "ml"`. The property
+asks the region which measure that unit belongs to (volume), then which unit
+the current unit system prefers for it. In the `us` system that is
+`fluid-ounce`; in `si` it is `milliliter`, and since that is the backend's
+unit no conversion happens. No converter is written:
+
+<Snippet name="config-conversion-implicit@widget-model.ts" />
+
+## 2. Explicit conversion
+
+A second binding, `otherVolume`, adds two options to its
+`@kosConfigProperty({ ... })`; the next two sections show one each.
+`converter` sets the conversion when the schema declares no format or the
+screen needs a fixed unit. `measure` names the family; `from` the backend unit (defaulting to the
+schema format); `to` the display unit (defaulting to the region's unit for
+the measure). Units are named by the region service's unit **names**:
+`milliliter`, `fluid-ounce`. The short aliases are not unique (`oz` is also
+the mass ounce), and a converter across families is refused.
+
+<Snippet name="config-converter@widget-model.ts" />
+
+## 3. Decimals and formatting
+
+The decimals and the formatter decide how a number is written.
+
+**Decimals** come from the schema's per-unit-system `options` when the bean
+declares them, otherwise from the region's unit definition (the `us` fluid
+ounce carries one decimal, the `si` millilitre none).
+
+**The formatter** is an `Intl.NumberFormat`. With a measure in play the
+default is `{ style: "unit", unit: <display unit> }` with the decimals above
+as `maximumFractionDigits`; `formatter` on the binding merges over that, and
+may be a function of the unit system so `si` and `us` format differently.
+
+<Snippet name="config-formatter@widget-model.ts" />
+
+`displayValue` is that formatter's output; `unit` is the unit part it
+produced; `significantValue` is the number rounded the same way.
+
+## 4. Per-unit-system options
+
+A bean can declare `options` per unit system: a range with an interval, a
+count, a list, a keypad. `displayOptions` returns the block for the current
+system; `options` expands a range into the discrete choices a control
+offers, and `optionsExpander` replaces or filters them.
+
+<Snippet name="config-display-options@widget-model.ts" />
+
+## What a property exposes
+
+| Reading | Meaning |
+| ------- | ------- |
+| `rawValue` | the backend value, untouched |
+| `value` | converted to the display unit; assigning it writes back |
+| `significantValue` | `value` rounded to the display decimals |
+| `displayValue` | the formatted string; `drt` formats render as a clock time |
+| `unit` | the display unit's symbol or name, as the formatter wrote it |
+| `previousValue` | the converted value before the last change |
+| `schemaType`, `schemaFormat` | the bean's declared type and unit |
+| `options`, `displayOptions` | choices and control hints for the current unit system |
+| `updateProperty(v)` | writes `v`, given in the display unit, back in the backend unit |
+
+## The view
+
+<Snippet name="config-conversion-view@config-conversion-view.tsx" />
+
+<Canvas of={Stories.ConfigConversionStory} sourceState="none" />
+
+Switch the unit system to `si` and watch `volume` stop converting while
+`otherVolume`, pinned to fluid ounces, keeps converting but changes its
+formatting. `rangeInterval` swaps its range and decimals with the system.
+Writes are always in the display unit: setting 12 while in fluid ounces
+stores 355 ml.

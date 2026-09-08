@@ -1,0 +1,91 @@
+import { Meta } from "@storybook/addon-docs/blocks";
+
+import { Snippet } from "../../snippet";
+
+<Meta title="Services/Service Caching" />
+
+# Service Caching
+
+Every lifecycle request's response is retained by the framework for the model.
+`cache` decides how long it stays: `retention` names the policy, `ttl` the
+lifetime for `TTL` retention, `extendOnRefresh` whether a repeat request keeps
+the existing data and only extends its lifetime, and `maxSize` is reserved.
+
+Caching belongs to lifecycle-driven requests. The method-driven form performs
+the call and hands back the result; nothing is retained.
+
+## How it was built
+
+| Step | Command |
+| ---- | ------- |
+| The request | kos-codegen `add_service_request`: `onStatsLoaded`, `GET /api/codex/objects/stats`, lifecycle LOAD |
+
+`GET /api/codex/objects/stats` answers with the object count and the instant it
+was computed, so the timestamp shows whether a response is cached or fresh.
+
+## The request
+
+The statistics request from the services page: a LOAD request whose callback
+copies three fields off the payload. The cache option attaches to this
+decorator.
+
+<Snippet name="service-load@document-model.ts" />
+
+## The cache option
+
+`cache` takes a `retention` policy and, for `TTL`, a `ttl` and an optional
+`extendOnRefresh`. The request below keeps its response for five seconds.
+
+<Snippet name="service-cache@document-model.ts" />
+
+## The retention policies
+
+Every lifecycle response is retained under its method and path, with the time
+the request was sent and the time the response arrived. The policy decides
+when that entry is removed.
+
+### IMMEDIATE
+
+The entry is removed as soon as the handler has returned. It exists while the
+handler runs, including an async handler, and no longer. Use it for a
+one-time operation whose response has no later reader.
+
+### SINGLE (the default)
+
+The entry stays until the next response for the same path replaces it. This
+is what a request gets with no `cache` option.
+
+### TTL
+
+The entry stays for `ttl` milliseconds and is then removed by a timer; a read
+after the deadline also removes it. Each new response replaces the entry and
+restarts the clock.
+
+With `extendOnRefresh: true`, a new response that arrives while the entry is
+still valid does not replace it: the existing entry is kept and its deadline
+moves out by another `ttl`. The handler still receives the new response; only
+the retained copy is the earlier one. Use it when the retained value is the
+expensive one and a refresh is only a heartbeat.
+
+### PERMANENT
+
+The entry stays until the model is destroyed. Use it for data the model needs
+for its whole lifetime.
+
+### MANUAL
+
+The entry stays until the model clears it with `clearServiceResponse`. Use it
+when the model decides when a response is stale.
+
+## Who reads a retained response
+
+The framework does. `requiresBaseline` on a topic handler reads the retained
+response's request and receipt times to decide which queued events to replay
+(the Lifecycle Race Conditions page). A model that needs a retained response
+reads it through the SDK's `getServiceResponse` and `hasCachedResponse`
+helpers and clears one with `clearServiceResponse`; it does not reach into the
+store itself. `maxSize` is declared for a future per-path bound and is not read
+by the SDK yet.
+
+The SDK does not log a retained or extended response, so there is no console
+line to look for on this page.

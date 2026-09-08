@@ -1,0 +1,85 @@
+import { Canvas, Meta } from "@storybook/addon-docs/blocks";
+
+import { Snippet } from "../../snippet";
+import * as Stories from "./parent-and-child-view.stories";
+
+<Meta title="Containers/Parent And Child" />
+
+# Parent and Child
+
+Children reach their owner through **context**. A child holds no direct
+reference to its parent. Every model has a context bean; a child's bean is
+nested under its parent's, so a key the parent sets resolves in every
+descendant. Enrolling a child (`@kosChild`, or adding it to an owned
+container) nests the context when the child is resolved. `@kosParentAware`
+nests it earlier, at construction and before the child's `init()`, so a child
+can reach up during its own lifecycle.
+
+## How it was built
+
+| Step | Command |
+| ---- | ------- |
+| The child | `kosui model --name user --parent-aware` (kos-codegen `scaffold_model` with `parentAware: true`) |
+| The parent sets a key | the team's constructor writes `teamId` to its context bean |
+| The parent enrolls the child | the team builds each user with `kosParentId: this.id`, the option `@kosParentAware` reads |
+
+## Declaring the child
+
+`@kosParentAware()` sits on the class and takes no options. At construction
+it reads the parent's id from the `kosParentId` option the child is built
+with and links the child's context under the parent. The option is required: a parent-aware model built without it fails to
+instantiate, because the container's own parent linking on `addModel`
+happens after construction. `UserOptions` extends `KosParentAware`, which declares the key.
+
+<Snippet name="user-parent-aware@user-model.ts" />
+
+## The parent sets a key
+
+The team writes `teamId` to its own context bean once, in its constructor.
+Every model created under the team resolves that key.
+
+<Snippet name="team-context-key@team-model.ts" />
+
+## Reading up
+
+`teamId` is a computed property over the context: `kosContext.get` walks up
+to the nearest ancestor that set the key. It is read when asked, so it is
+correct as soon as the parent context exists, and it recomputes if the child
+is ever re-parented. The constructor keeps the context bean for this and for
+the parent read below.
+
+<Snippet name="user-team-id@user-model.ts" />
+
+## Reaching the parent model
+
+`kosContext.parentModel` returns the parent model itself. The computed property is typed
+to `TeamModel`, so a component can read `user.team?.id` and re-render when the
+parent changes.
+
+<Snippet name="user-team@user-model.ts" />
+
+## Enrolling on the team side
+
+The team builds each child with `kosParentId: this.id`, whether it is the lead
+declared with `@kosChild` or a member added to the container. The container
+also links members to the team on `addModel`, and the child resolver links the
+lead, but both run after construction; the option is what the decorator reads
+when the child is built.
+
+<Snippet name="team-enroll-child@team-model.ts" />
+
+## The view
+
+<Snippet name="parent-and-child-view@parent-and-child-view.tsx" />
+
+<Snippet name="parent-and-child-view-story@parent-and-child-view.stories.tsx" />
+
+<Canvas of={Stories.ParentAndChildStory} sourceState="none" />
+
+## When the option is named differently
+
+`@kosParentAware` also accepts `parentId`, a PropKey naming an option that
+carries the parent's id. Its default is `kosParentId`. It exists for models
+whose options already carry the parent under another name, a migration case;
+new code leaves it out and lets the container set the parent. No model in the
+codex uses it.

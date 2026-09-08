@@ -1,0 +1,117 @@
+import { Canvas, Meta } from "@storybook/addon-docs/blocks";
+
+import { Snippet } from "../../snippet";
+import * as Stories from "./container-models-view.stories";
+
+<Meta title="Containers/Container Models" />
+
+# Container Models
+
+A container is KOS's collection: a reactive, indexed, lifecycle-aware set of
+models. `@kosContainerAware` adds one to a model and injects the methods that
+add and remove members, so the model owns its collection and the events that
+change it.
+
+`team` owns `user` models. The team creates them, adds them, removes and
+destroys them; no code outside the team modifies the collection.
+
+## How it was built
+
+| Step | Command |
+| ---- | ------- |
+| Scaffold both models | `kosui model --name team`, `kosui model --name user --parent-aware` (the parent-and-child page covers the flag) |
+| Put the container on the team | kos-codegen `add_container_support`: child `UserModel` |
+| Own a single child too | kos-codegen `add_child`: property `lead`, child `UserModel`, shape single |
+| Register, hooks, component | `register_model` ×2, `kosui model:hook` ×2, `kosui component --name container-models-view` |
+
+## The decorator
+
+`@kosContainerAware<Child>()` sits on the class, with no options; every
+option has a default. The journal's container is the bare form. The
+container's parent id is the owning model's own id, so each child's lifecycle
+is tied to its owner's. The decorator injects the container and a surface for
+working it:
+
+- `container`, the container itself, and `data`, the reactive array of its
+  models. `models` is a second name for the container.
+- `getModel(id)`, `addModel(model)`, `removeModel(id)`, `addAll(models)` and
+  `removeAll(ids)`. `removeModel` takes a model out of the container and
+  leaves it alive.
+- `removeAndDestroy(id)` and `removeAndDestroyAll(ids)`, which remove a model
+  and then destroy it.
+
+<Snippet name="journal-container@journal-model.ts" />
+
+The team, which the rest of this page follows, is the same decorator with
+`containerOptions` added for the indexes the Container Indexes page covers;
+the Container Capacity page adds the capacity options on another model.
+
+## Typing the container
+
+The decorator injects these members at runtime; the merged interface declares
+them for the compiler. `KosContainerAware<UserModel>` types the default
+layout, so `this.container` and `this.addModel(user)` resolve inside the
+class, and `team.data` resolves in a component.
+
+<Snippet name="team-container-type@team-model.ts" />
+
+## A single owned child
+
+`@kosChild` enrolls a single field as an owned child of the team, for a child
+that stands alone rather than in a collection. Its lifecycle is tied to the
+team's in the same way a container member's is.
+
+<Snippet name="team-lead@team-model.ts" />
+
+## Creating the children
+
+The team creates its lead in `init()` through the `User` bean, passing its
+own id as `kosParentId` because the user is parent-aware. The lead is
+destroyed with the team.
+
+<Snippet name="team-init@team-model.ts" />
+
+Members are built the same way and handed to the injected `addModel`;
+`removeAndDestroy` removes one from the container and disposes it. Because the
+team is the only thing that calls these, the collection changes only through
+the team's own methods.
+
+<Snippet name={["team-add-member@team-model.ts", "team-remove-member@team-model.ts"]} />
+
+## Reading through the child
+
+`leadName` is a computed property over the owned child. A component reads it like
+any other property and re-renders when the lead changes.
+
+<Snippet name="team-lead-name@team-model.ts" />
+
+## The view
+
+The component reads `team.data`, the injected reactive array, and re-renders
+when a member is added or removed.
+
+<Snippet name="container-models-view@container-models-view.tsx" />
+
+<Snippet name="container-models-view-story@container-models-view.stories.tsx" />
+
+<Canvas of={Stories.ContainerModelsStory} sourceState="none" />
+
+## Migration and naming options
+
+The remaining options rename or trim what the decorator injects. They exist
+for code written before the decorator, where callers already read the
+container under another name. A new model leaves them out. `document` carries
+them, since its code reads `this.notes`:
+
+- `containerProperty` renames the container (`notes`). The merged interface
+  then uses `KosContainerAwareWithProp<NoteModel, 'notes'>` in place of
+  `KosContainerAware<NoteModel>`, so the compiler knows the name.
+- `modelsProperty` renames the `models` getter (`noteList`).
+- `includeMethods` and `includeGetters` default to `true` and are only worth
+  writing as `false`, for a class that declares its own methods or getters
+  under the same names. The codex does not set them.
+- `containerOptions.extensionId` names the container to the extension
+  manager. An index extension registered under that id contributes its
+  indexes to the container.
+
+<Snippet name="document-container@document-model.ts" />

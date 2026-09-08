@@ -1,0 +1,1005 @@
+{
+ "decoratorCount": 28,
+ "optionCount": 126,
+ "unresolved": [],
+ "decorators": {
+  "kosChild": {
+   "file": "packages/kos-ui-sdk/src/core/core/decorators/kos-child.ts",
+   "optionsType": "{} | any",
+   "resolved": true,
+   "options": [],
+   "optionDetail": []
+  },
+  "kosCompanion": {
+   "file": "packages/kos-ui-sdk/src/core/core/decorators/kos-companion.ts",
+   "optionsType": "KosCompanionOptions",
+   "resolved": true,
+   "options": [
+    "excludeProperties",
+    "lifecycle",
+    "mode",
+    "parentProperty"
+   ],
+   "optionDetail": [
+    {
+     "name": "excludeProperties",
+     "optional": true,
+     "type": "string[]"
+    },
+    {
+     "name": "lifecycle",
+     "optional": true,
+     "type": "DependencyLifecycle"
+    },
+    {
+     "name": "mode",
+     "optional": true,
+     "type": "\"decorator\" | \"composition\""
+    },
+    {
+     "name": "parentProperty",
+     "optional": true,
+     "type": "string"
+    }
+   ]
+  },
+  "kosConfigBean": {
+   "file": "packages/kos-ui-sdk/src/models/decorators/kos-config-bean.ts",
+   "optionsType": "KosConfigParams",
+   "resolved": true,
+   "options": [
+    "lazy",
+    "path",
+    "serviceBasePath"
+   ],
+   "optionDetail": [
+    {
+     "name": "lazy",
+     "optional": true,
+     "type": "boolean"
+    },
+    {
+     "name": "path",
+     "optional": false,
+     "type": "string"
+    },
+    {
+     "name": "serviceBasePath",
+     "optional": true,
+     "type": "string"
+    }
+   ]
+  },
+  "kosConfigProperty": {
+   "file": "packages/kos-ui-sdk/src/models/decorators/kos-config-bean-prop.ts",
+   "optionsType": "KosConfigParams",
+   "resolved": true,
+   "options": [
+    "attribute",
+    "converter",
+    "converter.from",
+    "converter.measure",
+    "converter.to",
+    "formatter",
+    "lazy",
+    "optionsExpander",
+    "path",
+    "serviceBasePath"
+   ],
+   "optionDetail": [
+    {
+     "name": "attribute",
+     "optional": false,
+     "type": "string"
+    },
+    {
+     "name": "converter",
+     "optional": true,
+     "type": "{ measure?: string; from?: UnitConverter | string; to?: UnitConverter | string; }"
+    },
+    {
+     "name": "converter.from",
+     "optional": true,
+     "type": "UnitConverter | string"
+    },
+    {
+     "name": "converter.measure",
+     "optional": true,
+     "type": "string"
+    },
+    {
+     "name": "converter.to",
+     "optional": true,
+     "type": "UnitConverter | string"
+    },
+    {
+     "name": "formatter",
+     "optional": true,
+     "type": "| Intl.NumberFormatOptions | ((system: string) => Intl.NumberFormatOptions)"
+    },
+    {
+     "name": "lazy",
+     "optional": true,
+     "type": "boolean"
+    },
+    {
+     "name": "optionsExpander",
+     "optional": true,
+     "type": "OptionsExpander"
+    },
+    {
+     "name": "path",
+     "optional": false,
+     "type": "string"
+    },
+    {
+     "name": "serviceBasePath",
+     "optional": true,
+     "type": "string"
+    }
+   ]
+  },
+  "kosContainerAware": {
+   "file": "packages/kos-ui-sdk/src/core/core/decorators/kos-container-aware.ts",
+   "optionsType": "KosContainerAwareOptions<T>",
+   "resolved": true,
+   "options": [
+    "containerOptions",
+    "containerOptions.customEvictionFilter",
+    "containerOptions.evictionBatchSize",
+    "containerOptions.evictionStrategy",
+    "containerOptions.extensionId",
+    "containerOptions.indexMap",
+    "containerOptions.maxCapacity",
+    "containerOptions.parentId",
+    "containerOptions.sortKey",
+    "containerProperty",
+    "includeGetters",
+    "includeMethods",
+    "legacy",
+    "modelsProperty"
+   ],
+   "optionDetail": [
+    {
+     "name": "containerOptions",
+     "optional": true,
+     "type": "{ /** Default property to sort models by */ sortKey?: keyof T; /** * Index mapping for efficient qu…"
+    },
+    {
+     "name": "containerOptions.customEvictionFilter",
+     "optional": true,
+     "type": "(models: T[]) => T[]"
+    },
+    {
+     "name": "containerOptions.evictionBatchSize",
+     "optional": true,
+     "type": "number"
+    },
+    {
+     "name": "containerOptions.evictionStrategy",
+     "optional": true,
+     "type": "\"fifo\" | \"lru\" | \"custom\""
+    },
+    {
+     "name": "containerOptions.extensionId",
+     "optional": true,
+     "type": "string"
+    },
+    {
+     "name": "containerOptions.indexMap",
+     "optional": true,
+     "type": "Record< string, keyof T | ((model: T) => MaybePromise<string | string[] | undefined>) >"
+    },
+    {
+     "name": "containerOptions.maxCapacity",
+     "optional": true,
+     "type": "number"
+    },
+    {
+     "name": "containerOptions.parentId",
+     "optional": true,
+     "type": "string"
+    },
+    {
+     "name": "containerOptions.sortKey",
+     "optional": true,
+     "type": "keyof T"
+    },
+    {
+     "name": "containerProperty",
+     "optional": true,
+     "type": "string"
+    },
+    {
+     "name": "includeGetters",
+     "optional": true,
+     "type": "boolean"
+    },
+    {
+     "name": "includeMethods",
+     "optional": true,
+     "type": "boolean"
+    },
+    {
+     "name": "legacy",
+     "optional": true,
+     "type": "boolean"
+    },
+    {
+     "name": "modelsProperty",
+     "optional": true,
+     "type": "string"
+    }
+   ]
+  },
+  "kosContext": {
+   "file": "packages/kos-ui-sdk/src/core/core/decorators/kos-context.ts",
+   "optionsType": "any",
+   "resolved": true,
+   "options": [],
+   "optionDetail": []
+  },
+  "kosDependency": {
+   "file": "packages/kos-ui-sdk/src/core/core/decorators/kosDependency.ts",
+   "optionsType": "KosDependencyParams<Options>",
+   "resolved": true,
+   "options": [
+    "id",
+    "lifecycle",
+    "modelType",
+    "options",
+    "resolutionPolicy"
+   ],
+   "optionDetail": [
+    {
+     "name": "id",
+     "optional": true,
+     "type": "string"
+    },
+    {
+     "name": "lifecycle",
+     "optional": true,
+     "type": "DependencyLifecycle"
+    },
+    {
+     "name": "modelType",
+     "optional": false,
+     "type": "string"
+    },
+    {
+     "name": "options",
+     "optional": true,
+     "type": "Options"
+    },
+    {
+     "name": "resolutionPolicy",
+     "optional": true,
+     "type": "DependencyResolutionPolicy"
+    }
+   ]
+  },
+  "kosFuture": {
+   "file": "packages/kos-ui-sdk/src/models/decorators/future-service.ts",
+   "optionsType": "FutureProps",
+   "resolved": true,
+   "options": [
+    "abortController",
+    "alias",
+    "namespace",
+    "trackerPolicy"
+   ],
+   "optionDetail": [
+    {
+     "name": "abortController",
+     "optional": true,
+     "type": "boolean"
+    },
+    {
+     "name": "alias",
+     "optional": true,
+     "type": "string"
+    },
+    {
+     "name": "namespace",
+     "optional": true,
+     "type": "string"
+    },
+    {
+     "name": "trackerPolicy",
+     "optional": true,
+     "type": "\"id\" | \"context\""
+    }
+   ]
+  },
+  "kosFutureAware": {
+   "file": "packages/kos-ui-sdk/src/core/core/decorators/kos-future-aware.ts",
+   "optionsType": "KosFutureAwareOptions",
+   "resolved": true,
+   "options": [
+    "handlerProperty",
+    "mode"
+   ],
+   "optionDetail": [
+    {
+     "name": "handlerProperty",
+     "optional": true,
+     "type": "string"
+    },
+    {
+     "name": "mode",
+     "optional": true,
+     "type": "\"full\" | \"minimal\""
+    }
+   ]
+  },
+  "kosLogger": {
+   "file": "packages/kos-ui-sdk/src/core/core/decorators/kos-log.ts",
+   "optionsType": "LogConfigProps",
+   "resolved": true,
+   "options": [
+    "group"
+   ],
+   "optionDetail": [
+    {
+     "name": "group",
+     "optional": true,
+     "type": "string"
+    }
+   ]
+  },
+  "kosLoggerAware": {
+   "file": "packages/kos-ui-sdk/src/core/core/decorators/kos-logger-aware.ts",
+   "optionsType": "KosLoggerAwareOptions",
+   "resolved": true,
+   "options": [
+    "loggerContext",
+    "loggerProperty"
+   ],
+   "optionDetail": [
+    {
+     "name": "loggerContext",
+     "optional": true,
+     "type": "string"
+    },
+    {
+     "name": "loggerProperty",
+     "optional": true,
+     "type": "string"
+    }
+   ]
+  },
+  "kosModel": {
+   "file": "packages/kos-ui-sdk/src/core/core/decorators/kosModel.ts",
+   "optionsType": "string | KosModelConfig",
+   "resolved": true,
+   "options": [
+    "autoRegister",
+    "modelTypeId",
+    "optionsRequired",
+    "singleton"
+   ],
+   "optionDetail": [
+    {
+     "name": "autoRegister",
+     "optional": true,
+     "type": "boolean"
+    },
+    {
+     "name": "modelTypeId",
+     "optional": false,
+     "type": "string"
+    },
+    {
+     "name": "optionsRequired",
+     "optional": true,
+     "type": "boolean"
+    },
+    {
+     "name": "singleton",
+     "optional": true,
+     "type": "boolean"
+    }
+   ]
+  },
+  "kosModelEffect": {
+   "file": "packages/kos-ui-sdk/src/core/core/decorators/kos-model-effect.ts",
+   "optionsType": "KosModelEffectProps<T>",
+   "resolved": true,
+   "options": [
+    "dependencies",
+    "options",
+    "options.fireImmediately"
+   ],
+   "optionDetail": [
+    {
+     "name": "dependencies",
+     "optional": false,
+     "type": "(model: T) => any[]"
+    },
+    {
+     "name": "options",
+     "optional": true,
+     "type": "{ fireImmediately?: boolean; }"
+    },
+    {
+     "name": "options.fireImmediately",
+     "optional": true,
+     "type": "boolean"
+    }
+   ]
+  },
+  "kosMultipleFutureAware": {
+   "file": "packages/kos-ui-sdk/src/core/core/decorators/kos-multiple-future-aware.ts",
+   "optionsType": "KosMultipleFutureAwareOptions",
+   "resolved": true,
+   "options": [
+    "handlerProperty",
+    "mode"
+   ],
+   "optionDetail": [
+    {
+     "name": "handlerProperty",
+     "optional": true,
+     "type": "string"
+    },
+    {
+     "name": "mode",
+     "optional": true,
+     "type": "\"full\" | \"minimal\""
+    }
+   ]
+  },
+  "kosParentAware": {
+   "file": "packages/kos-ui-sdk/src/core/core/decorators/kos-parent.ts",
+   "optionsType": "KosParentProps",
+   "resolved": true,
+   "options": [
+    "parentId"
+   ],
+   "optionDetail": [
+    {
+     "name": "parentId",
+     "optional": true,
+     "type": "string"
+    }
+   ]
+  },
+  "kosReference": {
+   "file": "packages/kos-ui-sdk/src/core/core/decorators/kos-reference.ts",
+   "optionsType": "ReferenceProps",
+   "resolved": true,
+   "options": [
+    "modelType"
+   ],
+   "optionDetail": [
+    {
+     "name": "modelType",
+     "optional": false,
+     "type": "string"
+    }
+   ]
+  },
+  "kosReloadAware": {
+   "file": "packages/kos-ui-sdk/src/core/core/decorators/kos-reload-aware.ts",
+   "optionsType": null,
+   "resolved": true,
+   "options": [],
+   "optionDetail": []
+  },
+  "kosServiceRequest": {
+   "file": "packages/kos-ui-sdk/src/core/core/decorators/kos-service-request.ts",
+   "optionsType": "IKosServiceRequestParams<\n    Paths,\n    Path,\n    Method,\n    Response,\n    TransformedResponse\n  >",
+   "resolved": true,
+   "options": [
+    "body",
+    "cache",
+    "cache.extendOnRefresh",
+    "cache.maxSize",
+    "cache.retention",
+    "cache.ttl",
+    "condition",
+    "errorHandler",
+    "errorHandler.defaultValue",
+    "errorHandler.onError",
+    "errorHandler.strategy",
+    "extensions",
+    "idExtractor",
+    "iterateOver",
+    "lifecycle",
+    "mappings",
+    "method",
+    "modelFactory",
+    "path",
+    "pathParams",
+    "queryParams",
+    "requestOptions",
+    "transform"
+   ],
+   "optionDetail": [
+    {
+     "name": "body",
+     "optional": true,
+     "type": "| ClientBody<Paths, Path, Method> | (( model: IKosDataModel, ...args: any[] ) => ClientBody<Paths, …"
+    },
+    {
+     "name": "cache",
+     "optional": true,
+     "type": "ResponseCacheConfig"
+    },
+    {
+     "name": "cache.extendOnRefresh",
+     "optional": true,
+     "type": "boolean"
+    },
+    {
+     "name": "cache.maxSize",
+     "optional": true,
+     "type": "number"
+    },
+    {
+     "name": "cache.retention",
+     "optional": false,
+     "type": "ResponseRetention"
+    },
+    {
+     "name": "cache.ttl",
+     "optional": true,
+     "type": "number"
+    },
+    {
+     "name": "condition",
+     "optional": true,
+     "type": "(model: IKosDataModel) => boolean"
+    },
+    {
+     "name": "errorHandler",
+     "optional": true,
+     "type": "ErrorHandlerConfig"
+    },
+    {
+     "name": "errorHandler.defaultValue",
+     "optional": true,
+     "type": "any"
+    },
+    {
+     "name": "errorHandler.onError",
+     "optional": true,
+     "type": "(error: Error | ServiceRequestError, model: IKosDataModel) => void"
+    },
+    {
+     "name": "errorHandler.strategy",
+     "optional": false,
+     "type": "\"throw\" | \"log\" | \"ignore\" | \"default\""
+    },
+    {
+     "name": "extensions",
+     "optional": true,
+     "type": "ExtensionConfig[]"
+    },
+    {
+     "name": "idExtractor",
+     "optional": true,
+     "type": "(item: any) => string"
+    },
+    {
+     "name": "iterateOver",
+     "optional": true,
+     "type": "string"
+    },
+    {
+     "name": "lifecycle",
+     "optional": true,
+     "type": "DependencyLifecycle"
+    },
+    {
+     "name": "mappings",
+     "optional": true,
+     "type": "FieldMapping[]"
+    },
+    {
+     "name": "method",
+     "optional": true,
+     "type": "Method"
+    },
+    {
+     "name": "modelFactory",
+     "optional": true,
+     "type": "| KosModelRegistrationType<IKosDataModel, Record<string, unknown>> | ((id: string) => (options: unk…"
+    },
+    {
+     "name": "path",
+     "optional": false,
+     "type": "Path"
+    },
+    {
+     "name": "pathParams",
+     "optional": true,
+     "type": "| (ClientParams<Paths, Path, Method> extends { path?: infer P } ? P : never) | (( model: IKosDataMo…"
+    },
+    {
+     "name": "queryParams",
+     "optional": true,
+     "type": "| (ClientParams<Paths, Path, Method> extends { query?: infer Q } ? Q : never) | (( model: IKosDataM…"
+    },
+    {
+     "name": "requestOptions",
+     "optional": true,
+     "type": "| RequestOptions | ((model: IKosDataModel, ...args: any[]) => RequestOptions)"
+    },
+    {
+     "name": "transform",
+     "optional": true,
+     "type": "(response: Response) => TransformedResponse"
+    }
+   ]
+  },
+  "kosStateBean": {
+   "file": "packages/kos-ui-sdk/src/models/decorators/kos-state-bean.ts",
+   "optionsType": "KosStateParams",
+   "resolved": true,
+   "options": [
+    "path"
+   ],
+   "optionDetail": [
+    {
+     "name": "path",
+     "optional": false,
+     "type": "string"
+    }
+   ]
+  },
+  "kosStateEntry": {
+   "file": "packages/kos-ui-sdk/src/core/core/decorators/kos-state-machine.ts",
+   "optionsType": "TState",
+   "resolved": true,
+   "options": [],
+   "optionDetail": []
+  },
+  "kosStateExit": {
+   "file": "packages/kos-ui-sdk/src/core/core/decorators/kos-state-machine.ts",
+   "optionsType": "TState",
+   "resolved": true,
+   "options": [],
+   "optionDetail": []
+  },
+  "kosStateGuard": {
+   "file": "packages/kos-ui-sdk/src/core/core/decorators/kos-state-machine.ts",
+   "optionsType": "KosStateGuardOptions<TState>",
+   "resolved": true,
+   "options": [
+    "allowedStates",
+    "throwOnInvalid"
+   ],
+   "optionDetail": [
+    {
+     "name": "allowedStates",
+     "optional": false,
+     "type": "TState[]"
+    },
+    {
+     "name": "throwOnInvalid",
+     "optional": true,
+     "type": "boolean"
+    }
+   ]
+  },
+  "kosStateMachine": {
+   "file": "packages/kos-ui-sdk/src/core/core/decorators/kos-state-machine.ts",
+   "optionsType": "KosStateMachineConfig<TState, TEvent>",
+   "resolved": true,
+   "options": [
+    "initial",
+    "initializeAt",
+    "states"
+   ],
+   "optionDetail": [
+    {
+     "name": "initial",
+     "optional": false,
+     "type": "TState"
+    },
+    {
+     "name": "initializeAt",
+     "optional": true,
+     "type": "DependencyLifecycle"
+    },
+    {
+     "name": "states",
+     "optional": false,
+     "type": "Record< TState, { /** * Mapping of events to target states. * When an event occurs in this state, t…"
+    }
+   ]
+  },
+  "kosStateProp": {
+   "file": "packages/kos-ui-sdk/src/models/decorators/kos-state-prop.ts",
+   "optionsType": "KosStateParams<T>",
+   "resolved": true,
+   "options": [
+    "attribute",
+    "path"
+   ],
+   "optionDetail": [
+    {
+     "name": "attribute",
+     "optional": false,
+     "type": "`${string & StateKeys<T>}`"
+    },
+    {
+     "name": "path",
+     "optional": false,
+     "type": "string"
+    }
+   ]
+  },
+  "kosSubscribe": {
+   "file": "packages/kos-ui-sdk/src/core/core/decorators/kosSubscribe.ts",
+   "optionsType": "IKosSubscriptionHandlerParams<T, M>",
+   "resolved": true,
+   "options": [
+    "condition",
+    "handler",
+    "skipParse",
+    "topic",
+    "websocket"
+   ],
+   "optionDetail": [
+    {
+     "name": "condition",
+     "optional": true,
+     "type": "(payload: T, model: M) => boolean"
+    },
+    {
+     "name": "handler",
+     "optional": false,
+     "type": "Function"
+    },
+    {
+     "name": "skipParse",
+     "optional": true,
+     "type": "boolean"
+    },
+    {
+     "name": "topic",
+     "optional": false,
+     "type": "string"
+    },
+    {
+     "name": "websocket",
+     "optional": true,
+     "type": "boolean"
+    }
+   ]
+  },
+  "kosTopicHandler": {
+   "file": "packages/kos-ui-sdk/src/core/core/decorators/kosTopicHandler.ts",
+   "optionsType": "IKosTopicHandlerParams<Response, Model, TransformedResponse>",
+   "resolved": true,
+   "options": [
+    "bridge",
+    "buffer",
+    "buffer.maxSize",
+    "buffer.time",
+    "condition",
+    "debounce",
+    "destinationAddress",
+    "explicitDestination",
+    "filter",
+    "flow",
+    "flow.backpressure",
+    "flow.batch",
+    "flow.errorHandling",
+    "flow.filter",
+    "flow.rateLimit",
+    "flow.transform",
+    "fos",
+    "lifecycle",
+    "once",
+    "replay",
+    "replay.bufferSize",
+    "requiresBaseline",
+    "requiresBaseline.method",
+    "requiresBaseline.path",
+    "requiresBaseline.replayStrategy",
+    "skipParse",
+    "throttle",
+    "topic",
+    "transform",
+    "websocket",
+    "wildcardName"
+   ],
+   "optionDetail": [
+    {
+     "name": "bridge",
+     "optional": true,
+     "type": "boolean"
+    },
+    {
+     "name": "buffer",
+     "optional": true,
+     "type": "{ /** Time window to collect events (ms) */ time: number; /** Maximum number of events to buffer */…"
+    },
+    {
+     "name": "buffer.maxSize",
+     "optional": true,
+     "type": "number"
+    },
+    {
+     "name": "buffer.time",
+     "optional": false,
+     "type": "number"
+    },
+    {
+     "name": "condition",
+     "optional": true,
+     "type": "( payload: TransformedResponse, model: Model, raw: Response ) => boolean"
+    },
+    {
+     "name": "debounce",
+     "optional": true,
+     "type": "| number | { delay: number; /** If true, only keeps the last value. If false (default), accumulates…"
+    },
+    {
+     "name": "destinationAddress",
+     "optional": true,
+     "type": "string"
+    },
+    {
+     "name": "explicitDestination",
+     "optional": true,
+     "type": "boolean"
+    },
+    {
+     "name": "filter",
+     "optional": true,
+     "type": "(payload: Response) => boolean"
+    },
+    {
+     "name": "flow",
+     "optional": true,
+     "type": "FlowControlOptions<Response, TransformedResponse>"
+    },
+    {
+     "name": "flow.backpressure",
+     "optional": true,
+     "type": "{ /** Maximum concurrent handler executions */ maxConcurrent?: number; /** Queue size limit before …"
+    },
+    {
+     "name": "flow.batch",
+     "optional": true,
+     "type": "{ /** Maximum number of events in a batch */ size?: number; /** Maximum time window to collect even…"
+    },
+    {
+     "name": "flow.errorHandling",
+     "optional": true,
+     "type": "{ /** Retry failed events */ retry?: { attempts: number; backoffMs: number; }; /** Continue process…"
+    },
+    {
+     "name": "flow.filter",
+     "optional": true,
+     "type": "{ /** Predicate function for filtering events */ predicate: (event: T, context: FilterContext) => b…"
+    },
+    {
+     "name": "flow.rateLimit",
+     "optional": true,
+     "type": "{ /** Maximum events to process per time window */ maxEvents: number; /** Time window in millisecon…"
+    },
+    {
+     "name": "flow.transform",
+     "optional": true,
+     "type": "(events: T[]) => R"
+    },
+    {
+     "name": "fos",
+     "optional": true,
+     "type": "boolean"
+    },
+    {
+     "name": "lifecycle",
+     "optional": true,
+     "type": "DependencyLifecycle"
+    },
+    {
+     "name": "once",
+     "optional": true,
+     "type": "boolean"
+    },
+    {
+     "name": "replay",
+     "optional": true,
+     "type": "{ /** Number of events to remember and replay */ bufferSize: number; }"
+    },
+    {
+     "name": "replay.bufferSize",
+     "optional": false,
+     "type": "number"
+    },
+    {
+     "name": "requiresBaseline",
+     "optional": true,
+     "type": "BaselineDependency"
+    },
+    {
+     "name": "requiresBaseline.method",
+     "optional": true,
+     "type": "string"
+    },
+    {
+     "name": "requiresBaseline.path",
+     "optional": false,
+     "type": "string"
+    },
+    {
+     "name": "requiresBaseline.replayStrategy",
+     "optional": true,
+     "type": "ReplayStrategy"
+    },
+    {
+     "name": "skipParse",
+     "optional": true,
+     "type": "boolean"
+    },
+    {
+     "name": "throttle",
+     "optional": true,
+     "type": "| number | { interval: number; /** If true, only keeps the first value in window. If false (default…"
+    },
+    {
+     "name": "topic",
+     "optional": false,
+     "type": "string | string[]"
+    },
+    {
+     "name": "transform",
+     "optional": true,
+     "type": "(payload: Response) => TransformedResponse"
+    },
+    {
+     "name": "websocket",
+     "optional": true,
+     "type": "boolean"
+    },
+    {
+     "name": "wildcardName",
+     "optional": true,
+     "type": "string"
+    }
+   ]
+  },
+  "kosTroubleAware": {
+   "file": "packages/kos-ui-sdk/src/core/core/decorators/kos-trouble-aware.ts",
+   "optionsType": "KosTroubleAwareOptions",
+   "resolved": true,
+   "options": [
+    "pathProperty"
+   ],
+   "optionDetail": [
+    {
+     "name": "pathProperty",
+     "optional": true,
+     "type": "string"
+    }
+   ]
+  },
+  "kosViewModel": {
+   "file": "packages/kos-ui-sdk/src/core/core/decorators/kos-view-model.ts",
+   "optionsType": "KosViewModelOptions",
+   "resolved": true,
+   "options": [
+    "devToolsEnabled",
+    "typeId"
+   ],
+   "optionDetail": [
+    {
+     "name": "devToolsEnabled",
+     "optional": true,
+     "type": "boolean"
+    },
+    {
+     "name": "typeId",
+     "optional": true,
+     "type": "string"
+    }
+   ]
+  }
+ }
+}

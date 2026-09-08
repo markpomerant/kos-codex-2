@@ -1,0 +1,35 @@
+{
+  "name": "kos-codex-2-models",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/kos-codex-2-models/src",
+  "projectType": "library",
+  "tags": [],
+  "targets": {
+    "build": {
+      "executor": "@nx/vite:build",
+      "outputs": ["{options.outputPath}"],
+      "defaultConfiguration": "production",
+      "options": {
+        "outputPath": "dist/libs/kos-codex-2-models"
+      },
+      "configurations": {
+        "development": {
+          "mode": "development"
+        },
+        "production": {
+          "mode": "production"
+        }
+      }
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint"
+    },
+    "api": {
+      "command": "kosui api:generate --project=kos-codex-2-models",
+      "options": {
+        "host": "http://127.0.0.1:8081",
+        "defaultVersion": "snapshot"
+      }
+    }
+  }
+}

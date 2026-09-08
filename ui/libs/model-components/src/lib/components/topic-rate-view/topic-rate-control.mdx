@@ -1,0 +1,70 @@
+import { Canvas, Meta } from "@storybook/addon-docs/blocks";
+
+import { Snippet } from "../../snippet";
+import * as Stories from "./topic-rate-view.stories";
+
+<Meta title="Topics/Topic Rate Control" />
+
+# Topic Rate Control
+
+A device can publish events faster than a view can render them.
+`@kosTopicHandler` offers three wrappers that coalesce events before the
+model sees them. Each wrapper changes what the method receives and when it
+runs.
+
+| option     | what the method gets                          | when it runs                                        |
+| ---------- | --------------------------------------------- | --------------------------------------------------- |
+| `debounce` | an **array** of every event in the quiet window | once, after `delay` ms with no new event            |
+| `throttle` | one event                                     | at most once per `interval`; the rest are dropped   |
+| `buffer`   | one event per call                            | in flushes, at `maxSize` events or after `time` ms |
+
+Only one wrapper applies per handler. The framework checks `debounce`, then
+`throttle`, then `buffer`, then `once`, and uses the first it finds.
+
+## How it was built
+
+| Step | Command |
+| ---- | ------- |
+| Add the counters | kos-codegen `add_property`: `debounceCalls`, `debounceLastBatch`, `throttleCalls`, `bufferItems` |
+| Add the handlers | kos-codegen `add_topic_handler` for `onBurstDebounced`, `onBurstThrottled`, `onBurstBuffered` |
+| Generate the component | `kosui component --name topic-rate-view --project model-components` |
+
+Each snippet below shows the counter(s) the handler writes together with the
+handler itself.
+
+## debounce
+
+A number is the delay in milliseconds. By default every event of the burst is
+kept and handed over together, so the method signature takes an array. Pass
+`{ delay, discardIntermediate: true }` to receive only the last event instead.
+
+<Snippet name="topic-debounce@widget-model.ts" />
+
+Verified: five events 50 ms apart produce one call with a batch of five.
+
+## throttle
+
+`{ interval, discardIntermediate: true }` runs the first event of each window
+immediately and schedules one trailing call for the last event that arrived
+inside the window. Without `discardIntermediate`, throttle accumulates like
+debounce and the method receives an array per window.
+
+<Snippet name="topic-throttle@widget-model.ts" />
+
+Verified: five events 50 ms apart produce one call immediately and a second
+at the end of the 300 ms window.
+
+## buffer
+
+`{ time, maxSize }` collects events and flushes when either bound is hit; the
+method is then called once per buffered event.
+
+<Snippet name="topic-buffer@widget-model.ts" />
+
+## The view
+
+<Snippet name="topic-rate-view@topic-rate-view.tsx" />
+
+<Snippet name="topic-rate-story@topic-rate-view.stories.tsx" />
+
+<Canvas of={Stories.TopicRateStory} sourceState="none" />

@@ -1,0 +1,98 @@
+import { Canvas, Meta } from "@storybook/addon-docs/blocks";
+
+import { Snippet } from "../../snippet";
+import { RaceTimelines } from "./race-timeline";
+import * as Stories from "./topic-catch-up-view.stories";
+
+<Meta title="Topics/Lifecycle Race Conditions" />
+
+# Model Lifecycle Race Conditions
+
+A collection is a baseline plus deltas: a LOAD request establishes the state,
+and topic events amend it as other clients and the device change things. A
+event can arrive before the handler has subscribed, while the baseline request
+is in flight, or before the request was sent, and each case does something
+different to the model.
+
+In most models the baseline is isolated from the topics, or a delta carries
+enough context to be applied on its own, and the collection converges without
+these options. Use the options on this page when a delta cannot be applied
+safely without its baseline. The timelines below show the four cases and what
+`lifecycle`, `requiresBaseline` and `replay` do to each.
+
+<RaceTimelines />
+
+The `journal` model holds notes the codex backend publishes on its object
+topics, `/studio/codex/objects/added` and `/removed`. Those events are
+out-of-band events: another client changed the list, and the topic delivers
+the change to this model. Topic handlers exist for these events. The model's
+own requests apply their responses; they do not wait for a topic.
+
+## How it was built
+
+| Step | Command |
+| ---- | ------- |
+| The model | `scaffold_model journal`, then `add_container_support` (a container of `NoteModel` on the default `container` property) and `add_property` for the two counters |
+| The baseline | `add_service_request`: `onNotesLoaded`, lifecycle LOAD, on `GET /api/codex/test/objects/race` |
+| The handlers | `add_topic_handler` twice, on the backend's `added` and `removed` topics; `requiresBaseline` and `replay` added to the decorators |
+| The device side | the `device` model's requests ask the backend to add or remove a note out of band |
+
+## A baseline that races its own delta (case B, on demand)
+
+The backend serves the journal's baseline from a test endpoint built for this
+page: it adds a note, publishes it on the `added` topic, waits, and then
+answers with the list. Every load of a journal therefore sees a delta arrive
+while its baseline request is still in flight, which is case B. The options
+below handle it.
+
+<Snippet name="journal-baseline@journal-model.ts" />
+
+## The subscription
+
+The handler is an ordinary websocket topic handler on the `added` topic. It
+registers at `INIT`, so the subscription exists before the LOAD request goes
+out. With the default registration the subscription would be made after the
+event had already passed. `lifecycle` is the one option here that departs from
+the Topic Handlers opener, and it is what the page is about.
+
+<Snippet name="topic-catch-up@journal-model.ts" />
+
+## requiresBaseline
+
+`path` and `method` name the lifecycle request whose response is the
+baseline. Until it has answered, events on the topic are queued; then they
+are replayed according to `replayStrategy`: `AFTER_REQUEST` keeps events
+that arrived after the request was sent, `AFTER_RESPONSE` only those after
+the response, `ALL` everything, `NONE` discards the queue.
+
+<Snippet name="topic-requires-baseline@journal-model.ts" />
+
+## replay
+
+`replay.bufferSize` asks the event bus to keep the last events on the topic,
+for handlers that subscribe later. In this exemplar the `requiresBaseline`
+queue carries the early event; the replay buffer was not observed to deliver
+anything on its own.
+
+<Snippet name="topic-replay@journal-model.ts" />
+
+## The handlers
+
+An `added` event carries the note as stored; the handler counts it and
+updates the existing note in place or builds a new one. A `removed` event
+drops the model. Both run after the baseline has been applied.
+
+<Snippet name={["topic-catch-up-handler@journal-model.ts", "topic-catch-up-removed@journal-model.ts"]} />
+
+## The view
+
+<Snippet name="topic-catch-up-view@topic-catch-up-view.tsx" />
+
+<Snippet name="topic-catch-up-story@topic-catch-up-view.stories.tsx" />
+
+<Canvas of={Stories.TopicCatchUpStory} sourceState="none" />
+
+When the story opens, the baseline's own delta arrives during the request and
+is applied only after the response lands (the console shows "Baseline not
+ready … Queuing message"). The buttons ask the backend for further out-of-band
+changes, which arrive over the websocket like any device event.

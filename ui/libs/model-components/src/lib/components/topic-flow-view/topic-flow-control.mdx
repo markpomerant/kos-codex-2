@@ -1,0 +1,76 @@
+import { Canvas, Meta } from "@storybook/addon-docs/blocks";
+
+import { Snippet } from "../../snippet";
+import * as Stories from "./topic-flow-view.stories";
+
+<Meta title="Topics/Topic Flow Control" />
+
+# Topic Flow Control
+
+`flow` is a second pipeline on `@kosTopicHandler`, separate from the
+top-level options. The top-level shortcuts wrap the method; `flow` replaces
+the subscription with an async iterator that batches, filters, rate-limits
+and retries before the method runs. Three consequences are verified on this
+page:
+
+- the top-level `transform` and `filter` are **not applied**; the flow
+  `transform` receives the raw transport envelopes (`{ headers, body }`, body
+  still a string) and must parse them itself;
+- a partial batch waits for the **next event** to flush; there is no timer,
+  so the last events of a burst sit until something else arrives;
+- `rateLimit` with `onExceeded: "drop"` discards the excess events; it does
+  not delay or coalesce them, which separates it from `throttle`.
+
+## How it was built
+
+| Step | Command |
+| ---- | ------- |
+| Add the counters | kos-codegen `add_property`: `flowBatches`, `flowBatchSum`, `flowAccepted`, `flowAttempts`, `flowSucceeded` |
+| Add the handlers | kos-codegen `add_topic_handler` for `onFlowBatch`, `onFlowLimited`, `onFlowRetried` |
+| Generate the component | `kosui component --name topic-flow-view --project model-components` |
+
+Each snippet below shows the counter(s) the handler writes together with the
+handler itself.
+
+## batch, transform, filter, backpressure
+
+`batch` bounds a batch by `size` or `window`. `transform(events)` folds the
+batch into whatever the method takes. `filter.predicate(event, context)`
+drops events, with `historySize` recent events available in the context for
+stateful decisions. `backpressure` bounds concurrent handler runs and the
+queue behind them, with a `dropPolicy` for overflow.
+
+<Snippet name="topic-flow-batch@widget-model.ts" />
+
+Verified: a burst of four events yields one batch (`1+2+3 = 6`) at once; the
+fourth event is delivered only when the next burst begins. After two bursts
+the eight events arrived in three batches summing to 20.
+
+## rateLimit
+
+`{ maxEvents, windowMs, onExceeded }`. `"drop"` discards the excess,
+`"delay"` waits for the next window, `"error"` is reported by the flow.
+
+<Snippet name="topic-flow-rate-limit@widget-model.ts" />
+
+Verified: five events in one second deliver two, and the count is still two a
+second later.
+
+## errorHandling
+
+`retry: { attempts, backoffMs }` re-runs a throwing handler with a growing
+back-off; `continueOnError` keeps the flow alive after the retries are
+exhausted. Without a retry block a throwing handler ends the flow.
+
+<Snippet name="topic-flow-errors@widget-model.ts" />
+
+Verified: two events whose first attempt throws produce four attempts and two
+successes, and two logged errors.
+
+## The view
+
+<Snippet name="topic-flow-view@topic-flow-view.tsx" />
+
+<Snippet name="topic-flow-story@topic-flow-view.stories.tsx" />
+
+<Canvas of={Stories.TopicFlowStory} sourceState="none" />

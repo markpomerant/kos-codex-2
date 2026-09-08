@@ -1,0 +1,14 @@
+{
+  "default_keyset": "prod.kos",
+  "prebuild_cmd": "build/release_version_prebuild.sh",
+  "build_cmd": "build/build-release.sh",
+
+  "artifacts": [
+    {
+      "id": "kos-codex-2-ui",
+      "filename": "ui/apps/kos-codex-2-ui/target/kos-codex-2-ui.kab",
+      "artifactstore": "kos-cdn",
+      "marketplace": 1
+    }
+  ]
+}
