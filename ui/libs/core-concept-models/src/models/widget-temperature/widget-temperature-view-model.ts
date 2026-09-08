@@ -1,27 +1,21 @@
+/**
+ * UI-only state for the WidgetTemperature view, held beside the KOS data models it
+ * reads rather than inside them. A ViewModel is not registered and is
+ * not part of the model graph; create one per component with
+ * `useViewModel(() => new WidgetTemperatureViewModel(widget))`.
+ */
 import {
   kosViewModel,
   kosLoggerAware,
   type KosViewModelLoggerAware,
 } from '@kosdev-code/kos-ui-sdk';
-
-import type { WidgetModel } from './widget-model';
+import type { WidgetModel } from '../widget/widget-model';
 
 // eslint-disable-next-line @typescript-eslint/no-unsafe-declaration-merging
 export interface WidgetTemperatureViewModel extends KosViewModelLoggerAware {}
 
-/**
- * A ViewModel holds UI-only state — the chosen unit, the alert flag the panel
- * shows — beside a data model it reads from. It is created per component
- * instance by `useViewModel`, not registered, and not part of the model graph.
- */
 // extract-code view-model-decorator
-@kosViewModel({
-  typeId: 'widget-temperature',
-  // extract-code ignore start view-model-decorator
-  // extract-code view-model-devtools
-  devToolsEnabled: true,
-  // extract-code ignore end view-model-decorator
-})
+@kosViewModel({ typeId: 'widget-temperature' })
 @kosLoggerAware()
 // extract-code end view-model-decorator
 // eslint-disable-next-line @typescript-eslint/no-unsafe-declaration-merging
@@ -50,4 +44,5 @@ export class WidgetTemperatureViewModel {
     this.unit = this.unit === 'C' ? 'F' : 'C';
     this.logger.info(`unit is now ${this.unit}`);
   }
+  // extract-code end view-model-action
 }

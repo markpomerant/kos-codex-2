@@ -511,3 +511,9 @@ Two container shapes exist. The team owns its users, so `@kosContainerAware<User
 
 ## Container build steps use `kosui model:add-container` (2026-09-08)
 The CLI update added `model:add-container` (decorates an existing owner model) and `model:add-parent-aware`, and honours `--dryRun`. Six build sections now show the real command: container-models, container-indexes (`--sortKey name`), container-capacity (`--containerProperty tasks`), services (`--containerProperty notes`), topic-catch-up (journal), parent-and-child (second command). The single-child (`lead`) step and the indexMap/capacity options remain hand edits.
+
+## Home page (2026-09-08)
+The landing page from the previous codex (`kos/kos_mark/packages/tools/kos-codex-ui`, `landing-page.mdx`) is recreated in `libs/model-components/src/lib/landing-page/` with its header background, icons and card layout. It is the docs-only page titled "Home", first in `storySort.order`, so the Storybook root opens on it; `manager-head.html` hides its sidebar item and the brand logo (`.storybook/theme.ts`, `brandUrl`) returns to it. Two cards: Core Concepts opens Foundations / Simple Model; Dispense Concepts is "Coming soon" for the dispense codex. Card links use `target="_top"` so they navigate the whole Storybook, not the docs iframe.
+
+## View Models built with `kosui model:view-model` (2026-09-08)
+The exemplar moved from `widget/widget-view-model.ts` to the generator's location, `widget-temperature/widget-temperature-view-model.ts`, produced by `kosui model:view-model --name widget-temperature --project core-concept-models --models widget`. Generated without options, so the decorator line is the generator's output; only the `unit` state, computed values and action were added, with the same snippet names as before. The generator does not touch `.kos.json`, which matches the page's statement that ViewModels are not registered.

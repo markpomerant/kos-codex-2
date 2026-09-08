@@ -13,3 +13,4 @@ export * from './models/device';
 export * from './models/journal';
 export * from './models/sprint';
 export * from './models/ticket';
+export * from './models/widget-temperature';

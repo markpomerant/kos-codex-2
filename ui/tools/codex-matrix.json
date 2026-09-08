@@ -83,6 +83,12 @@
         "excludeProperties"
       ],
       "reason": "Only read in decorator mode (it lists parent members not to proxy). The codex's companion is a composition companion, so there is no honest home for it."
+    },
+    "kosViewModel": {
+      "options": [
+        "devToolsEnabled"
+      ],
+      "reason": "Hands each instance to globalThis.__KOS_DEVTOOLS__.registerViewModel when that hook exists; nothing in the SDK or its consumers defines it, so the option has no effect today and the codex leaves it out."
     }
   },
   "pages": [
@@ -508,8 +514,7 @@
       ],
       "claims": {
         "kosViewModel": [
-          "typeId",
-          "devToolsEnabled"
+          "typeId"
         ]
       },
       "teaches": "A model shaped for a view rather than for the device."

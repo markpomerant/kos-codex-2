@@ -27,6 +27,7 @@ const preview: Preview = {
     options: {
       storySort: {
         order: [
+          "Home",
           "Foundations", ["Simple Model", "Communication Patterns", "Model Relationships", "Computed Properties", "Prop Keys", "Advanced Options"],
           "Reactivity", ["Model Effects", "View Models"],
           "Containers", ["Container Models", "Dedicated Container Model", "Container Indexes", "Container Capacity", "Parent And Child"],

@@ -293,6 +293,13 @@ Landing points: codegen | resources | tools | skills | codex-prose | none-needed
 - Landing point:  tools
 - Rationale:      The mutator exists (`add_container_support`) but has no `kosui` surface, so a human following the page has nothing to run. Mark also wants the joined model-plus-container shape (`user` + `user-container`) taught as its own exemplar, since one class with several collections outgrows a single `@kosContainerAware`; that is a page, not a tool gap.
 
+### `devToolsEnabled` on `@kosViewModel` has no consumer
+- Context:        Writing the View Models page. The option's doc and the kos://decorator/kosViewModel resource say it "registers this ViewModel with KOS DevTools for inspection".
+- Workaround:     The page states what the code does: the instance is passed to `globalThis.__KOS_DEVTOOLS__.registerViewModel` when that global exists, and nothing in kos-ui-sdk, kos-studio-ui, kos-ddk or cui-kit defines it.
+- Frequency:      always
+- Landing point:  resources
+- Rationale:      `kos-view-model.ts` calls the hook on construction and never unregisters, so a registry that did exist would keep every instance a remounting component creates. Either ship the bridge (with disposal on `useViewModel` unmount) or reword the option and the resource as an integration hook.
+
 ## SDK changes made in `~/Code/kos-ui-sdk` (committed on develop, 2026-09-07; published as 3.0.21 on 2026-09-08 and verified in the codex: buffered handlers deliver, a LOAD request with iterateOver + mappings fills the list on open, `modelFactory: Note` type-checks without a cast. Unchanged in 3.0.21: CONTINUE at construction-time injection; the envelope-without-data fallback.)
 
 | commit | change |
