@@ -58,9 +58,10 @@ timer calls it `session`.
 
 <Snippet name="timer-companion-parent-property@timer-model.ts" />
 
-The field is declared without an assignment: the framework injects the parent
-when it creates the companion. `declare` tells TypeScript the field exists
-without emitting an initializer that would overwrite it.
+The framework defines that property on the instance when it creates the
+companion, so the class declares no field for it. The merged interface names
+it, the same way it names the injected `logger`, and the class body stays
+clear of anything the decorator provides.
 
 <Snippet name="timer-parent-field@timer-model.ts" />
 

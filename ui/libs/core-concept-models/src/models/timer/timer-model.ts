@@ -37,10 +37,14 @@ export type TimerModel = PublicModelInterface<TimerModelImpl>;
 // Interface merging for decorator type safety
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 // extract-code timer-merge
+// extract-code timer-parent-field
 export interface TimerModelImpl
   extends KosLoggerAware,
     KosCompanionComposition<SessionModel>,
-    KosMultipleFutureAwareFull<'short' | 'long'> {}
+    KosMultipleFutureAwareFull<'short' | 'long'> {
+  readonly session: SessionModel;
+}
+// extract-code end timer-parent-field
 
 // extract-code timer-model
 @kosModel({ modelTypeId: MODEL_TYPE, singleton: false })
@@ -68,9 +72,6 @@ export class TimerModelImpl implements IKosDataModel, IKosIdentifiable {
   id: string;
   // logger property is automatically provided by @kosLoggerAware decorator
 
-  /** The parent, injected under the name given to `parentProperty`. */
-  // extract-code timer-parent-field
-  declare readonly session: SessionModel;
   lastUpdate: string = '';
 
   constructor(modelId: string, _options: TimerOptions) {
